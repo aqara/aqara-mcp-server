@@ -1,0 +1,15 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+dist/
+bin/
+build/
+build.sh
+commit.sh
+.idea
+.vscode
+.DS_Store
+wheels/
+*.egg-info
+*_test.go
+.venv
