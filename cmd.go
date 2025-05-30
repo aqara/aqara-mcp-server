@@ -29,7 +29,7 @@ var (
 		Long:  "Execute various runtime operations for the Aqara MCP server, such as starting it with different transport protocols.",
 	}
 
-	// stdioCmd represents the command to start the server with stdio transport.
+	// stdioCmd represents the command to start the server with Stdio transport.
 	stdioCmd = &cobra.Command{
 		Use:   "stdio",
 		Short: "Start server with stdio transport",
@@ -37,12 +37,12 @@ var (
 		Run:   runStdioServer,
 	}
 
-	// sseCmd represents the command to start the server with SSE transport.
-	sseCmd = &cobra.Command{
-		Use:   "sse",
-		Short: "Start server with SSE (Server-Sent Events) transport",
-		Long:  `Starts the Aqara MCP server communicating via Server-Sent Events (SSE), typically using JSON-RPC messages over HTTP.`,
-		Run:   runSseServer,
+	// streamableHTTPServerCmd represents the command to start the server with StreamableHTTP transport.
+	httpCmd = &cobra.Command{
+		Use:   "http",
+		Short: "Start server with streamablehttp transport",
+		Long:  `Starts the Aqara MCP server communicating via StreamableHTTP, typically using JSON-RPC messages over HTTP.`,
+		Run:   runStreamableHTTPServer,
 	}
 )
 
@@ -52,10 +52,10 @@ func runStdioServer(cmd *cobra.Command, args []string) {
 	serverStart("stdio")
 }
 
-// runSseServer is the function executed by the sseCmd.
-func runSseServer(cmd *cobra.Command, args []string) {
-	// fmt.Println("Starting server with SSE transport...")
-	serverStart("sse")
+// runStreamableHTTPServer is the function executed by the sseCmd.
+func runStreamableHTTPServer(cmd *cobra.Command, args []string) {
+	// fmt.Println("Starting server with StreamableHTTPServer transport...")
+	serverStart("http")
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -88,6 +88,6 @@ func init() {
 
 	// Add subcommands.
 	runCmd.AddCommand(stdioCmd)
-	runCmd.AddCommand(sseCmd)
+	runCmd.AddCommand(httpCmd)
 	rootCmd.AddCommand(runCmd)
 }

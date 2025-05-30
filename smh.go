@@ -313,6 +313,7 @@ func httpPost[T any](url string, data any, headers map[string]string) (*T, strin
 	return nil, result.Message
 }
 
+// httpGet executes an HTTP GET request and returns the parsed result.
 func httpGet[T any](baseURL string, queryParams map[string]string) (*T, error) {
 	parsedURL, err := url.Parse(baseURL)
 	if err != nil {

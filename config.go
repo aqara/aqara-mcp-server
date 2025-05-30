@@ -42,11 +42,6 @@ func init() {
 	MCPCloudAPIBase = getCloudAPIBase()
 	AppID = genAppID()
 	AppSecret = genSecret()
-	// go asyncGenSecret()
-}
-
-func asyncGenSecret() {
-	AppSecret = genSecret()
 }
 
 func genSecret() string {
@@ -125,7 +120,11 @@ func genDeviceID() string {
 // genAppID generates an application identifier.
 func genAppID() string {
 	prefix := "mcp-"
-	hash := md5.New()
-	hash.Write([]byte(prefix + DeviceID))
-	return prefix + hex.EncodeToString(hash.Sum(nil))
+	return prefix + md5Hash(prefix+DeviceID)
+}
+
+func md5Hash(str string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(str))
+	return hex.EncodeToString(hasher.Sum(nil))
 }

@@ -1,275 +1,349 @@
-# Servidor Aqara MCP
+<div align="center" style="display: flex; align-items: center; justify-content: center; ">
+
+  <img src="/readme/img/logo.png" alt="Aqara Logo" height="120">
+  <h1>MCP Server</h1>
+
+</div>
+
+<div align="center">
 
 [English](/readme/README.md) | [中文](/readme/README_CN.md) | [繁體中文](/readme/README_CHT.md) | [Français](/readme/README_FR.md) | [한국어](/readme/README_KR.md) | Español | [日本語](/readme/README_JP.md) | [Deutsch](/readme/README_DE.md) | [Italiano](/readme/README_IT.md)
 
-[![Estado de Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/aqara/aqara-mcp-server)
-[![Versión Go](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org/dl/)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/aqara/aqara-mcp-server)
+[![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org/dl/)
 [![Release](https://img.shields.io/github/v/release/aqara/aqara-mcp-server)](https://github.com/aqara/aqara-mcp-server/releases)
-[![Licencia: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Aqara MCP Server es un servicio de control domótico desarrollado basado en el protocolo [MCP (Model Context Protocol)](https://modelcontextprotocol.io/introduction). Permite que cualquier asistente de IA o API que soporte el protocolo MCP (como Claude, ChatGPT, Cursor, etc.) interactúe con sus dispositivos domóticos Aqara, habilitando control de dispositivos, consultas de estado, ejecución de escenas y más a través de lenguaje natural.
+</div>
+
+Aqara MCP Server es un servicio de control de hogar inteligente desarrollado basado en el protocolo [MCP (Model Context Protocol)](https://modelcontextprotocol.io/introduction). Permite que cualquier asistente de IA o API que soporte el protocolo MCP (como Claude, Cursor, etc.) interactúe con sus dispositivos de hogar inteligente Aqara, logrando funciones como control de dispositivos a través de lenguaje natural, consulta de estados, ejecución de escenas, etc.
 
 ## Índice
 
-- [Servidor Aqara MCP](#servidor-aqara-mcp)
-  - [Índice](#índice)
-  - [Características](#características)
-  - [Cómo Funciona](#cómo-funciona)
-  - [Inicio Rápido](#inicio-rápido)
-    - [Prerrequisitos](#prerrequisitos)
-    - [Instalación](#instalación)
-    - [Autenticación de Cuenta Aqara](#autenticación-de-cuenta-aqara)
-    - [Ejemplo de Configuración (Claude for Desktop)](#ejemplo-de-configuración-claude-for-desktop)
-    - [Ejecutar el Servicio](#ejecutar-el-servicio)
-  - [Herramientas Disponibles](#herramientas-disponibles)
+- [Índice](#índice)
+- [Características](#características)
+- [Cómo Funciona](#cómo-funciona)
+- [Inicio Rápido](#inicio-rápido)
+  - [Requisitos Previos](#requisitos-previos)
+  - [Instalación](#instalación)
+    - [Método 1: Descargar Versión Precompilada (Recomendado)](#método-1-descargar-versión-precompilada-recomendado)
+    - [Método 2: Compilar desde Código Fuente](#método-2-compilar-desde-código-fuente)
+  - [Autenticación de Cuenta Aqara](#autenticación-de-cuenta-aqara)
+  - [Configuración del Cliente](#configuración-del-cliente)
+    - [Ejemplo de Configuración para Claude for Desktop](#ejemplo-de-configuración-para-claude-for-desktop)
+    - [Descripción de Parámetros de Configuración](#descripción-de-parámetros-de-configuración)
+    - [Otros Clientes MCP](#otros-clientes-mcp)
+  - [Iniciar el Servicio](#iniciar-el-servicio)
+    - [Modo Estándar (Recomendado)](#modo-estándar-recomendado)
+    - [Modo HTTP (Opcional)](#modo-http-opcional)
+- [Descripción de Herramientas de API](#descripción-de-herramientas-de-api)
+  - [Control de Dispositivos](#control-de-dispositivos)
     - [device\_control](#device_control)
+  - [Consulta de Dispositivos](#consulta-de-dispositivos)
     - [device\_query](#device_query)
     - [device\_status\_query](#device_status_query)
     - [device\_log\_query](#device_log_query)
-    - [run\_scenes](#run_scenes)
+  - [Gestión de Escenas](#gestión-de-escenas)
     - [get\_scenes](#get_scenes)
-    - [automation\_config](#automation_config)
+    - [run\_scenes](#run_scenes)
+  - [Gestión del Hogar](#gestión-del-hogar)
     - [get\_homes](#get_homes)
     - [switch\_home](#switch_home)
-  - [Estructura del Proyecto](#estructura-del-proyecto)
-    - [Descripciones de Archivos Principales](#descripciones-de-archivos-principales)
-  - [Contribuir](#contribuir)
-  - [Licencia](#licencia)
+  - [Configuración de Automatización](#configuración-de-automatización)
+    - [automation\_config](#automation_config)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+  - [Estructura de Directorios](#estructura-de-directorios)
+  - [Descripción de Archivos Principales](#descripción-de-archivos-principales)
+- [Guía de Desarrollo](#guía-de-desarrollo)
+- [Licencia](#licencia)
 
 ## Características
 
-- **Control Integral de Dispositivos**: Soporte para control fino de dispositivos inteligentes Aqara incluyendo interruptores, brillo, temperatura de color, modos, y más.
-- **Consultas Flexibles de Dispositivos**: Consultar listas de dispositivos y estados detallados por habitación y tipo de dispositivo.
-- **Gestión Inteligente de Escenas**: Soporte para consultar y ejecutar escenas domóticas preestablecidas por el usuario.
-- **Historial de Dispositivos**: Consultar cambios de estado históricos de dispositivos dentro de rangos de tiempo especificados.
-- **Configuración de Automatización**: Soporte para configurar tareas de control de dispositivos programadas o diferidas.
-- **Soporte Multi-Hogar**: Soporte para consultar y cambiar entre diferentes hogares bajo cuentas de usuario.
-- **Compatible con Protocolo MCP**: Totalmente conforme a las especificaciones del protocolo MCP, fácil de integrar con varios asistentes de IA.
-- **Mecanismo de Autenticación Seguro**: Utiliza autenticación segura basada en autorización de inicio de sesión + firma para proteger datos de usuario y seguridad de dispositivos.
-- **Multiplataforma**: Construido con Go, puede compilarse en ejecutables para múltiples plataformas.
-- **Fácil de Extender**: Diseño modular permite agregar fácilmente nuevas herramientas y características.
+- **Control Completo de Dispositivos**: Soporta control fino de múltiples atributos como encendido/apagado, brillo, temperatura de color, modo, etc. para dispositivos inteligentes Aqara
+- **Consulta Flexible de Dispositivos**: Capacidad de consultar listas de dispositivos y sus estados detallados por habitación y tipo de dispositivo
+- **Gestión Inteligente de Escenas**: Soporta consulta y ejecución de escenas de hogar inteligente preconfiguradas por el usuario
+- **Historial de Dispositivos**: Consulta registros de cambios de estado históricos de dispositivos en rangos de tiempo específicos
+- **Configuración de Automatización**: Soporta configuración de tareas de control de dispositivos programadas o retardadas
+- **Soporte Multi-Hogar**: Soporta consulta y cambio entre diferentes hogares bajo la cuenta del usuario
+- **Compatibilidad con Protocolo MCP**: Cumple completamente con las especificaciones del protocolo MCP, fácil de integrar con varios asistentes de IA
+- **Mecanismo de Autenticación Segura**: Adopta autenticación segura basada en autorización de inicio de sesión + firma para proteger datos del usuario y seguridad del dispositivo
+- **Ejecución Multiplataforma**: Desarrollado en Go, puede compilarse en archivos ejecutables para múltiples plataformas
+- **Fácil de Extender**: Diseño modular que permite agregar nuevas herramientas y funcionalidades fácilmente
 
 ## Cómo Funciona
 
-Aqara MCP Server actúa como un puente entre asistentes de IA y la plataforma domótica Aqara:
+Aqara MCP Server actúa como un puente entre asistentes de IA y la plataforma de hogar inteligente Aqara:
 
-1. **Asistente de IA (Cliente MCP)**: Los usuarios emiten comandos a través de asistentes de IA (ej., "Enciende las luces del salón").
-2. **Cliente MCP**: Analiza comandos de usuario y llama herramientas correspondientes proporcionadas por Aqara MCP Server según el protocolo MCP (ej., `device_control`).
-3. **Aqara MCP Server (Este Proyecto)**: Recibe solicitudes de clientes, las valida, y llama al módulo `smh.go`.
-4. **Módulo `smh.go`**: Usa credenciales Aqara configuradas para comunicarse con APIs en la nube de Aqara para operaciones reales de dispositivos o consultas de datos.
-5. **Flujo de Respuesta**: La API en la nube de Aqara devuelve resultados, que se pasan a través de Aqara MCP Server al cliente MCP y finalmente se presentan al usuario.
+1. **Asistente de IA (Cliente MCP)**: El usuario emite comandos a través del asistente de IA (por ejemplo, "Enciende las luces de la sala")
+2. **Cliente MCP**: Analiza los comandos del usuario y llama las herramientas correspondientes proporcionadas por Aqara MCP Server según el protocolo MCP (por ejemplo, `device_control`)
+3. **Aqara MCP Server (este proyecto)**: Recibe solicitudes del cliente, las valida y llama el módulo `smh.go`
+4. **Módulo `smh.go`**: Utiliza las credenciales Aqara configuradas para comunicarse con la API en la nube de Aqara, ejecutando operaciones reales de dispositivos o consultas de datos
+5. **Flujo de Respuesta**: La API en la nube de Aqara devuelve resultados, que se transmiten de vuelta al cliente MCP a través de Aqara MCP Server, finalmente presentándose al usuario
 
 ## Inicio Rápido
 
-### Prerrequisitos
+### Requisitos Previos
 
 - Go (versión 1.24 o superior)
-- Git (para construir desde fuentes)
-- Cuenta Aqara con dispositivos inteligentes conectados
+- Git (para compilar desde código fuente)
+- Cuenta Aqara y dispositivos inteligentes vinculados
 
 ### Instalación
 
-Puede elegir descargar ejecutables precompilados o construir desde fuentes.
+Puede elegir descargar archivos ejecutables precompilados o compilar desde código fuente.
 
-**Opción 1: Descargar Versión Precompilada (Recomendado)**
+#### Método 1: Descargar Versión Precompilada (Recomendado)
 
-Visite el enlace a continuación para descargar el último paquete ejecutable para su sistema operativo.
+Visite la página de GitHub Releases para descargar el archivo ejecutable más reciente para su sistema operativo:
 
-[Página de Releases](https://github.com/aqara/aqara-mcp-server/releases)
+**📥 [Ir a la página de Releases para descargar](https://github.com/aqara/aqara-mcp-server/releases)**
 
-Extraer y usar directamente.
+Después de descargar el archivo comprimido correspondiente a su plataforma, descomprímalo y estará listo para usar.
 
-**Opción 2: Construir desde Fuentes**
+#### Método 2: Compilar desde Código Fuente
 
 ```bash
-# Clonar repositorio
+# Clonar el repositorio
 git clone https://github.com/aqara/aqara-mcp-server.git
 cd aqara-mcp-server
 
 # Descargar dependencias
 go mod tidy
 
-# Construir ejecutable
+# Compilar archivo ejecutable
 go build -o aqara-mcp-server
 ```
 
-Después de construir, el ejecutable `aqara-mcp-server` se generará en el directorio actual.
+Después de completar la compilación, se generará el archivo ejecutable `aqara-mcp-server` en el directorio actual.
 
 ### Autenticación de Cuenta Aqara
 
-Para permitir que el MCP Server acceda a su cuenta Aqara y controle dispositivos, primero debe completar la autorización de inicio de sesión.
+Para que el MCP Server pueda acceder a su cuenta Aqara y controlar dispositivos, necesita completar primero la autorización de inicio de sesión.
 
 Por favor visite la siguiente dirección para completar la autorización de inicio de sesión:
-[https://cdn.aqara.com/app/mcpserver/login.html](https://cdn.aqara.com/app/mcpserver/login.html)
+**🔗 [https://cdn.aqara.com/app/mcpserver/login.html](https://cdn.aqara.com/app/mcpserver/login.html)**
 
-Después de un inicio de sesión exitoso, obtendrá la información de autenticación necesaria (como `token`, `region`), que se usará en pasos de configuración posteriores.
+Después del inicio de sesión exitoso, obtendrá la información de autenticación necesaria (como `token`, `region`), que se utilizará en los pasos de configuración posteriores.
 
-**Por favor mantenga esta información segura, especialmente el `token` - no lo comparta con otros.**
+> ⚠️ **Recordatorio de Seguridad**: Por favor mantenga segura la información del `token` y no la divulgue a otros.
 
-### Ejemplo de Configuración (Claude for Desktop)
+### Configuración del Cliente
 
-Diferentes clientes MCP tienen métodos de configuración ligeramente diferentes. Aquí hay un ejemplo de cómo configurar Claude for Desktop para usar este MCP Server:
+Los métodos de configuración para diferentes clientes MCP varían ligeramente. El siguiente es un ejemplo de cómo configurar Claude for Desktop para usar este MCP Server:
 
-1. Abrir Configuración de Claude for Desktop.
-2. Cambiar a la pestaña Desarrollador.
-3. Hacer clic en Editar Config para abrir el archivo de configuración con un editor de texto.
+#### Ejemplo de Configuración para Claude for Desktop
 
-   ![](/readme/img/setting0.png)
-   ![](/readme/img/setting1.png)
+1. Abra la configuración (Settings) de Claude for Desktop
 
-4. Agregar la información de configuración de la "Página de Éxito de Inicio de Sesión" al archivo de configuración del cliente (claude_desktop_config.json). Ejemplo de configuración:
+    ![Claude Open Setting](/readme/img/opening_setting.png)
 
-   ![](/readme/img/config.png)
+2. Cambie a la pestaña de desarrollador (Developer), luego haga clic en editar configuración (Edit Config), use un editor de texto para abrir el archivo de configuración
 
-**Notas de Configuración:**
-- `command`: Ruta completa a su ejecutable `aqara-mcp-server` descargado o construido
-- `args`: Usar `["run", "stdio"]` para iniciar modo de transporte stdio
+    ![Claude Edit Configuration](/readme/img/edit_config.png)
+
+3. Agregue la información de configuración de la "página de inicio de sesión exitoso" al archivo de configuración del cliente `claude_desktop_config.json`
+
+    ![Configuration Example](/readme/img/config_info.png)
+
+#### Descripción de Parámetros de Configuración
+
+- `command`: Ruta completa al archivo ejecutable `aqara-mcp-server` que descargó o compiló
+- `args`: Use `["run", "stdio"]` para iniciar el modo de transporte stdio
 - `env`: Configuración de variables de entorno
   - `token`: Token de acceso obtenido de la página de inicio de sesión de Aqara
-  - `region`: Región de su cuenta Aqara (ej., CN, US, EU, etc.)
+  - `region`: La región donde se encuentra su cuenta Aqara (como CN, US, EU, etc.)
 
-### Ejecutar el Servicio
+#### Otros Clientes MCP
 
-Reiniciar Claude for Desktop. Luego puede usar conversaciones para llamar herramientas proporcionadas por el MCP Server para control de dispositivos, consultas de dispositivos, y otras operaciones.
+Para otros clientes que soportan el protocolo MCP (como ChatGPT, Cursor, etc.), la configuración es similar:
 
-![](/readme/img/claude.png)
+- Asegúrese de que el cliente soporte el protocolo MCP
+- Configure la ruta del archivo ejecutable y parámetros de inicio
+- Configure las variables de entorno `token` y `region`
+- Seleccione el protocolo de transporte apropiado (se recomienda usar `stdio`)
 
-**Configuración de Otros Clientes MCP**
+### Iniciar el Servicio
 
-Para otros clientes que soportan el protocolo MCP (como Claude, ChatGPT, Cursor, etc.), la configuración es similar:
-- Asegurar que el cliente soporte el protocolo MCP
-- Configurar ruta de archivo ejecutable y parámetros de inicio
-- Establecer variables de entorno `token` y `region`
-- Elegir protocolo de transporte apropiado (stdio recomendado)
+#### Modo Estándar (Recomendado)
 
-**Modo SSE (Opcional)**
+Reinicie Claude for Desktop. Luego podrá ejecutar operaciones como control de dispositivos, consulta de dispositivos, ejecución de escenas, etc. a través de lenguaje natural.
 
-Si necesita usar modo SSE (Server-Sent Events), puede iniciarlo así:
+![Claude Chat Example](/readme/img/claude.png)
+
+#### Modo HTTP (Opcional)
+
+Si necesita usar el modo HTTP, puede iniciarlo así:
 
 ```bash
-# Usar puerto por defecto 8080
-./aqara-mcp-server run sse
+# Usar puerto predeterminado 8080
+./aqara-mcp-server run http
 
 # O especificar host y puerto personalizados
-./aqara-mcp-server run sse --host localhost --port 9000
+./aqara-mcp-server run http --host localhost --port 9000
 ```
 
-Luego usar parámetros `["run", "sse"]` en la configuración del cliente.
+Luego use los parámetros `["run", "http"]` en la configuración del cliente.
 
-## Herramientas Disponibles
+## Descripción de Herramientas de API
 
-Los clientes MCP pueden interactuar con dispositivos domóticos Aqara llamando estas herramientas.
+Los clientes MCP pueden interactuar con dispositivos de hogar inteligente Aqara llamando estas herramientas.
 
-### device_control
+### Control de Dispositivos
 
-- **Descripción**: Controlar el estado o propiedades de dispositivos domóticos (ej., encendido/apagado, temperatura, brillo, color, temperatura de color, etc.).
-- **Parámetros**:
-  - `endpoint_ids` (Array<Integer>, requerido): Lista de IDs de dispositivos a controlar.
-  - `control_params` (Object, requerido): Objeto de parámetros de control conteniendo operaciones específicas.
-    - `action` (String, requerido): Acción a ejecutar. Ejemplos: `"on"`, `"off"`, `"set"`, `"up"`, `"down"`, `"cooler"`, `"warmer"`.
-    - `attribute` (String, requerido): Atributo de dispositivo a controlar. Ejemplos: `"on_off"`, `"brightness"`, `"color_temperature"`, `"ac_mode"`.
-    - `value` (String | Number, opcional): Valor objetivo (requerido cuando la acción es "set").
-    - `unit` (String, opcional): Unidad del valor (ej., `"%"`, `"K"`, `"℃"`).
-- **Retorna**: (String) Mensaje de resultado de operación para control de dispositivo.
+#### device_control
 
-### device_query
+Controla el estado o atributos de dispositivos de hogar inteligente (como encendido/apagado, temperatura, brillo, color, temperatura de color, etc.).
 
-- **Descripción**: Obtener lista de dispositivos por ubicación especificada (habitación) y tipo de dispositivo (no incluye información de estado en tiempo real, solo lista dispositivos y sus IDs).
-- **Parámetros**:
-  - `positions` (Array<String>, opcional): Lista de nombres de habitaciones. Si es array vacío o no se proporciona, consulta todas las habitaciones.
-  - `device_types` (Array<String>, opcional): Lista de tipos de dispositivos. Ejemplos: `"Light"`, `"WindowCovering"`, `"AirConditioner"`, `"Button"`, etc. Si es array vacío o no se proporciona, consulta todos los tipos.
-- **Retorna**: (String) Lista de dispositivos formateada en Markdown incluyendo nombres de dispositivos e IDs.
+**Parámetros:**
 
-### device_status_query
+- `endpoint_ids` _(Array\<Integer\>, requerido)_: Lista de IDs de dispositivos a controlar
+- `control_params` _(Object, requerido)_: Objeto de parámetros de control, contiene operaciones específicas:
+  - `action` _(String, requerido)_: Operación a ejecutar (como `"on"`, `"off"`, `"set"`, `"up"`, `"down"`, `"cooler"`, `"warmer"`)
+  - `attribute` _(String, requerido)_: Atributo del dispositivo a controlar (como `"on_off"`, `"brightness"`, `"color_temperature"`, `"ac_mode"`)
+  - `value` _(String | Number, opcional)_: Valor objetivo (requerido cuando action es "set")
+  - `unit` _(String, opcional)_: Unidad del valor (como `"%"`, `"K"`, `"℃"`)
 
-- **Descripción**: Obtener información de estado actual de dispositivos (para consultar atributos relacionados con estado como color, brillo, interruptores, etc.).
-- **Parámetros**:
-  - `positions` (Array<String>, opcional): Lista de nombres de habitaciones. Si es array vacío o no se proporciona, consulta todas las habitaciones.
-  - `device_types` (Array<String>, opcional): Lista de tipos de dispositivos. Mismas opciones que `device_query`. Si es array vacío o no se proporciona, consulta todos los tipos.
-- **Retorna**: (String) Información de estado de dispositivos formateada en Markdown.
+**Retorna:** Mensaje de resultado de la operación de control del dispositivo
 
-### device_log_query
+### Consulta de Dispositivos
 
-- **Descripción**: Consultar logs de dispositivos.
-- **Parámetros**:
-  - `endpoint_ids` (Array<Integer>, requerido): Lista de IDs de dispositivos para consultar historial.
-  - `start_datetime` (String, opcional): Tiempo de inicio de consulta en formato `YYYY-MM-DD HH:MM:SS` (ej., `"2023-05-16 12:00:00"`).
-  - `end_datetime` (String, opcional): Tiempo de fin de consulta en formato `YYYY-MM-DD HH:MM:SS`.
-  - `attribute` (String, opcional): Nombre de atributo específico de dispositivo a consultar (ej., `on_off`, `brightness`). Si no se proporciona, consulta todos los atributos registrados para el dispositivo.
-- **Retorna**: (String) Información de estado histórico de dispositivos formateada en Markdown. (Nota: La implementación actual puede mostrar "This feature will be available soon.", indicando que la característica está pendiente de finalización.)
+#### device_query
 
-### run_scenes
+Obtiene lista de dispositivos según ubicación especificada (habitación) y tipo de dispositivo (no incluye información de estado en tiempo real).
 
-- **Descripción**: Ejecutar escenas especificadas por ID de escena.
-- **Parámetros**:
-  - `scenes` (Array<Integer>, requerido): Lista de IDs de escenas a ejecutar.
-- **Retorna**: (String) Mensaje de resultado de ejecución de escena.
+**Parámetros:**
 
-### get_scenes
+- `positions` _(Array\<String\>, opcional)_: Lista de nombres de habitaciones. Array vacío significa consultar todas las habitaciones
+- `device_types` _(Array\<String\>, opcional)_: Lista de tipos de dispositivos (como `"Light"`, `"WindowCovering"`, `"AirConditioner"`, `"Button"`). Array vacío significa consultar todos los tipos
 
-- **Descripción**: Consultar todas las escenas en el hogar del usuario, o escenas dentro de habitaciones especificadas.
-- **Parámetros**:
-  - `positions` (Array<String>, opcional): Lista de nombres de habitaciones. Si es array vacío o no se proporciona, consulta escenas para todo el hogar.
-- **Retorna**: (String) Información de escenas formateada en Markdown.
+**Retorna:** Lista de dispositivos en formato Markdown, incluyendo nombres de dispositivos e IDs
 
-### automation_config
+#### device_status_query
 
-- **Descripción**: Configurar tareas de control de dispositivos programadas o diferidas.
-- **Parámetros**:
-  - `scheduled_time` (String, requerido): Punto de tiempo establecido (para tareas diferidas, convertido basado en tiempo actual), formato `YYYY-MM-DD HH:MM:SS` (ej., `"2025-05-16 12:12:12"`).
-  - `endpoint_ids` (Array<Integer>, requerido): Lista de IDs de dispositivos para control programado.
-  - `control_params` (Object, requerido): Parámetros de control de dispositivo usando el mismo formato que la herramienta `device_control` (incluyendo action, attribute, value, etc.).
-- **Retorna**: (String) Mensaje de resultado de configuración de automatización.
+Obtiene información del estado actual de dispositivos (usado para consultar información de estado en tiempo real como color, brillo, encendido/apagado, etc.).
 
-### get_homes
+**Parámetros:**
 
-- **Descripción**: Obtener todas las listas de hogares bajo la cuenta de usuario.
-- **Parámetros**: Ninguno.
-- **Retorna**: (String) Lista de nombres de hogares separados por comas. Retorna cadena vacía o mensaje apropiado si no hay datos.
+- `positions` _(Array\<String\>, opcional)_: Lista de nombres de habitaciones. Array vacío significa consultar todas las habitaciones
+- `device_types` _(Array\<String\>, opcional)_: Lista de tipos de dispositivos. Valores opcionales iguales a `device_query`. Array vacío significa consultar todos los tipos
 
-### switch_home
+**Retorna:** Información de estado de dispositivos en formato Markdown
 
-- **Descripción**: Cambiar el hogar de operación actual del usuario. Después del cambio, consultas de dispositivos, controles, y otras operaciones posteriores apuntarán al hogar recién cambiado.
-- **Parámetros**:
-  - `home_name` (String, requerido): Nombre del hogar objetivo (debe provenir de la lista disponible proporcionada por la herramienta `get_homes`).
-- **Retorna**: (String) Mensaje de resultado de operación de cambio.
+#### device_log_query
+
+Consulta información de registro histórico de dispositivos.
+
+**Parámetros:**
+
+- `endpoint_ids` _(Array\<Integer\>, requerido)_: Lista de IDs de dispositivos para consultar historial
+- `start_datetime` _(String, opcional)_: Hora de inicio de consulta, formato `YYYY-MM-DD HH:MM:SS` (ejemplo: `"2023-05-16 12:00:00"`)
+- `end_datetime` _(String, opcional)_: Hora de fin de consulta, formato `YYYY-MM-DD HH:MM:SS`
+- `attribute` _(String, opcional)_: Nombre específico del atributo del dispositivo a consultar (como `on_off`, `brightness`). Cuando no se proporciona, consulta todos los atributos registrados
+
+**Retorna:** Información de estado histórico de dispositivos en formato Markdown
+
+> 📝 **Nota:** La implementación actual puede mostrar "This feature will be available soon.", indicando que la funcionalidad está pendiente de completar.
+
+### Gestión de Escenas
+
+#### get_scenes
+
+Consulta todas las escenas bajo el hogar del usuario, o escenas dentro de habitaciones específicas.
+
+**Parámetros:**
+
+- `positions` _(Array\<String\>, opcional)_: Lista de nombres de habitaciones. Array vacío significa consultar escenas de todo el hogar
+
+**Retorna:** Información de escenas en formato Markdown
+
+#### run_scenes
+
+Ejecuta escenas específicas según IDs de escena.
+
+**Parámetros:**
+
+- `scenes` _(Array\<Integer\>, requerido)_: Lista de IDs de escenas a ejecutar
+
+**Retorna:** Mensaje de resultado de ejecución de escenas
+
+### Gestión del Hogar
+
+#### get_homes
+
+Obtiene lista de todos los hogares bajo la cuenta del usuario.
+
+**Parámetros:** Ninguno
+
+**Retorna:** Lista de nombres de hogares separados por comas. Si no hay datos, retorna cadena vacía o mensaje informativo correspondiente
+
+#### switch_home
+
+Cambia el hogar actualmente operado por el usuario. Después del cambio, operaciones posteriores como consulta de dispositivos, control, etc. se dirigirán al nuevo hogar cambiado.
+
+**Parámetros:**
+
+- `home_name` _(String, requerido)_: Nombre del hogar objetivo
+
+**Retorna:** Mensaje de resultado de la operación de cambio
+
+### Configuración de Automatización
+
+#### automation_config
+
+Configura tareas de control de dispositivos programadas o retardadas (actualmente solo soporta configuración de automatización de temporizador fijo).
+
+**Parámetros:**
+
+- `scheduled_time` _(String, requerido)_: Punto de tiempo establecido (si es una tarea retardada, se convierte basado en el punto de tiempo actual), formato `YYYY-MM-DD HH:MM:SS` (ejemplo: `"2025-05-16 12:12:12"`)
+- `endpoint_ids` _(Array\<Integer\>, requerido)_: Lista de IDs de dispositivos para control programado
+- `control_params` _(Object, requerido)_: Parámetros de control de dispositivos, usando el mismo formato que la herramienta `device_control` (incluyendo action, attribute, value, etc.)
+
+**Retorna:** Mensaje de resultado de configuración de automatización
+
+> 📝 **Nota:** La implementación actual puede mostrar "This feature will be available soon.", indicando que la funcionalidad está pendiente de completar.
 
 ## Estructura del Proyecto
 
-```
+### Estructura de Directorios
+
+```text
 .
-├── cmd.go                # Definiciones de comandos CLI Cobra y punto de entrada del programa (contiene función main)
-├── server.go             # Lógica central del servidor MCP, definiciones de herramientas y manejo de solicitudes
-├── smh.go                # Wrapper de interfaz API de plataforma domótica Aqara
-├── middleware.go         # Middleware: autenticación de usuario, control de timeout, recuperación de excepciones
+├── cmd.go                # Definición de comandos CLI Cobra y punto de entrada del programa (incluye función main)
+├── server.go             # Lógica central del servidor MCP, definición de herramientas y manejo de solicitudes
+├── smh.go                # Encapsulado de interfaz API de la plataforma de hogar inteligente Aqara
+├── middleware.go         # Middleware: autenticación de usuario, control de tiempo de espera, recuperación de excepciones
 ├── config.go             # Gestión de configuración global y manejo de variables de entorno
 ├── go.mod                # Archivo de gestión de dependencias del módulo Go
 ├── go.sum                # Archivo de suma de verificación de dependencias del módulo Go
-├── img/                  # Recursos de imágenes usadas en documentación README
+├── readme/               # Documentación README y recursos de imágenes
+│   ├── img/              # Directorio de recursos de imágenes
+│   └── *.md              # Archivos README en múltiples idiomas
 ├── LICENSE               # Licencia de código abierto MIT
-└── README.md             # Documentación del proyecto
+└── README.md             # Documento principal del proyecto
 ```
 
-### Descripciones de Archivos Principales
+### Descripción de Archivos Principales
 
-- **`cmd.go`**: Implementación CLI basada en framework Cobra, definiendo modos de inicio `run stdio` y `run sse` y función de entrada principal
-- **`server.go`**: Implementación central del servidor MCP, responsable de registro de herramientas, manejo de solicitudes, y soporte de protocolo
-- **`smh.go`**: Capa wrapper de API de plataforma domótica Aqara, proporcionando control de dispositivos, autenticación, y soporte multi-hogar
-- **`middleware.go`**: Middleware de procesamiento de solicitudes proporcionando validación de autenticación, control de timeout, y manejo de excepciones
+- **`cmd.go`**: Implementación CLI basada en el framework Cobra, define modos de inicio `run stdio` y `run http` y función de entrada principal
+- **`server.go`**: Implementación central del servidor MCP, responsable del registro de herramientas, manejo de solicitudes y soporte de protocolo
+- **`smh.go`**: Capa de encapsulado de API de la plataforma de hogar inteligente Aqara, proporciona control de dispositivos, autenticación y soporte multi-hogar
+- **`middleware.go`**: Middleware de procesamiento de solicitudes, proporciona validación de autenticación, control de tiempo de espera y manejo de excepciones
 - **`config.go`**: Gestión de configuración global, responsable del manejo de variables de entorno y configuración de API
 
-## Contribuir
+## Guía de Desarrollo
 
-¡Bienvenido a contribuir al proyecto enviando Issues o Pull Requests!
+¡Bienvenido a participar en las contribuciones del proyecto enviando Issues o Pull Requests!
 
 Antes de enviar código, por favor asegúrese de que:
-1. El código sigue los estándares de codificación del lenguaje Go.
-2. Las definiciones de herramientas MCP relacionadas y interfaces de prompt mantienen consistencia y claridad.
-3. Agregar o actualizar pruebas unitarias para cubrir sus cambios.
-4. Actualizar documentación relevante (como este README) si es necesario.
-5. Asegurar que sus mensajes de commit sean claros y descriptivos.
+
+1. El código sigue las normas de codificación del lenguaje Go
+2. Las herramientas MCP relacionadas y las definiciones de interfaz mantienen consistencia y claridad
+3. Agregar o actualizar pruebas unitarias para cubrir sus cambios
+4. Si es necesario, actualizar la documentación relacionada (como este README)
+5. Asegurar que sus mensajes de commit sean claros y comprensibles
 
 ## Licencia
 
-Este proyecto está licenciado bajo la [Licencia MIT](/LICENSE).
-Copyright (c) 2025 Aqara-Copliot
+Este proyecto está licenciado bajo [MIT License](/LICENSE).
+
+Copyright (c) 2025 Aqara-Copilot
