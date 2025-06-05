@@ -16,7 +16,7 @@ English | [中文](/readme/README_CN.md) | [繁體中文](/readme/README_CHT.md)
 
 </div>
 
-Aqara MCP Server is a smart home control service developed based on the [MCP (Model Context Protocol)](https://modelcontextprotocol.io/introduction) protocol. It allows any AI assistant or API that supports the MCP protocol (such as Claude, Cursor, etc.) to interact with your Aqara smart home devices, enabling device control, status queries, scene execution, and more through natural language.
+Aqara MCP Server is an intelligent home automation control service built on the [MCP (Model Context Protocol)](https://modelcontextprotocol.io/introduction). It enables any MCP-compatible AI assistant or API (such as Claude, Cursor, etc.) to interact with your Aqara smart home devices, providing natural language device control, status queries, and scene execution capabilities.
 
 ## Table of Contents
 
@@ -26,7 +26,7 @@ Aqara MCP Server is a smart home control service developed based on the [MCP (Mo
 - [Quick Start](#quick-start)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-    - [Option 1: Download Pre-compiled Version (Recommended)](#option-1-download-pre-compiled-version-recommended)
+    - [Option 1: Download Pre-built Binaries (Recommended)](#option-1-download-pre-built-binaries-recommended)
     - [Option 2: Build from Source](#option-2-build-from-source)
   - [Aqara Account Authentication](#aqara-account-authentication)
   - [Client Configuration](#client-configuration)
@@ -35,8 +35,8 @@ Aqara MCP Server is a smart home control service developed based on the [MCP (Mo
     - [Other MCP Clients](#other-mcp-clients)
   - [Starting the Service](#starting-the-service)
     - [Standard Mode (Recommended)](#standard-mode-recommended)
-    - [HTTP Mode (Optional)](#http-mode-optional)
-- [API Tools Documentation](#api-tools-documentation)
+    - [HTTP Mode (Coming Soon)](#http-mode-coming-soon)
+- [API Tools Reference](#api-tools-reference)
   - [Device Control](#device-control)
     - [device\_control](#device_control)
   - [Device Query](#device-query)
@@ -53,52 +53,60 @@ Aqara MCP Server is a smart home control service developed based on the [MCP (Mo
     - [automation\_config](#automation_config)
 - [Project Structure](#project-structure)
   - [Directory Structure](#directory-structure)
-  - [Core Files Description](#core-files-description)
+  - [Core Files](#core-files)
 - [Development Guide](#development-guide)
 - [License](#license)
 
 ## Features
 
-- **Comprehensive Device Control**: Supports fine-grained control of various attributes of Aqara smart devices including switches, brightness, color temperature, modes, etc.
-- **Flexible Device Queries**: Query device lists and their detailed status by room and device type
-- **Smart Scene Management**: Support for querying and executing user-preset smart home scenes
-- **Device History Records**: Query historical status change records of devices within specified time ranges
-- **Automation Configuration**: Support for configuring scheduled or delayed device control tasks
-- **Multi-Home Support**: Support for querying and switching between different homes under user accounts
-- **MCP Protocol Compatibility**: Fully compliant with MCP protocol specifications, easy to integrate with various AI assistants
-- **Secure Authentication**: Uses login authorization + signature-based security authentication to protect user data and device security
-- **Cross-Platform**: Developed in Go language, can be compiled to executable files for multiple platforms
-- **Easy to Extend**: Modular design allows for easy addition of new tools and features
+- ✨ **Comprehensive Device Control**: Support for precise control of various Aqara smart device attributes including power, brightness, color temperature, and operating modes
+- 🔍 **Flexible Device Queries**: Query device lists and detailed status by room or device type
+- 🎬 **Smart Scene Management**: Query and execute user-configured smart home scenes
+- 📈 **Device History**: Query device historical state changes within specified time ranges
+- ⏰ **Automation Configuration**: Configure scheduled or delayed device control tasks
+- 🏠 **Multi-Home Support**: Query and switch between different homes under your account
+- 🔌 **MCP Protocol Compatibility**: Full compliance with MCP protocol specifications for seamless AI assistant integration
+- 🔐 **Secure Authentication**: Login-based authorization with signature-based security to protect user data and devices
+- 🌐 **Cross-Platform**: Built with Go for compilation to multiple platform executables
+- 🔧 **Extensible**: Modular design for easy addition of new tools and functionality
 
 ## How It Works
 
 Aqara MCP Server serves as a bridge between AI assistants and the Aqara smart home platform:
 
-1. **AI Assistant (MCP Client)**: Users issue commands through AI assistants (e.g., "Turn on the living room lights")
-2. **MCP Client**: Parses user commands and calls corresponding tools provided by Aqara MCP Server according to MCP protocol (e.g., `device_control`)
-3. **Aqara MCP Server (this project)**: Receives requests from clients, validates them, and calls the `smh.go` module
-4. **`smh.go` Module**: Uses configured Aqara credentials to communicate with Aqara cloud APIs, executing actual device operations or data queries
-5. **Response Flow**: Aqara cloud APIs return results, which are passed back through Aqara MCP Server to the MCP client and finally presented to the user
+```mermaid
+graph LR
+    A[AI Assistant] --> B[MCP Client]
+    B --> C[Aqara MCP Server]
+    C --> D[Aqara Cloud API]
+    D --> E[Smart Devices]
+```
+
+1. **AI Assistant**: Users issue commands through AI assistants (e.g., "Turn on the living room lights")
+2. **MCP Client**: Parses user commands and calls appropriate Aqara MCP Server tools (e.g., `device_control`) per MCP protocol
+3. **Aqara MCP Server (This Project)**: Receives client requests, communicates with Aqara Cloud API using configured credentials to execute device operations or data queries
+4. **Response Flow**: Aqara Cloud API returns results through Aqara MCP Server back to the MCP client, ultimately presented to the user
 
 ## Quick Start
 
 ### Prerequisites
 
-- Go (version 1.24 or higher)
-- Git (for building from source)
-- Aqara account with bound smart devices
+- **Go** (version 1.24 or higher) - Only required for building from source
+- **Git** (for building from source) - Optional
+- **Aqara Account** with registered smart devices
+- **MCP-compatible client** (such as Claude for Desktop, Cursor, etc.)
 
 ### Installation
 
-You can choose to download pre-compiled executable files or build from source.
+You can either download pre-built executables or build from source.
 
-#### Option 1: Download Pre-compiled Version (Recommended)
+#### Option 1: Download Pre-built Binaries (Recommended)
 
-Visit the GitHub Releases page to download the latest executable file for your operating system:
+Visit the GitHub Releases page to download the latest executable for your operating system:
 
 **📥 [Go to Releases Page](https://github.com/aqara/aqara-mcp-server/releases)**
 
-Download and extract the appropriate package for your platform.
+Simply download and extract the appropriate package for your platform.
 
 #### Option 2: Build from Source
 
@@ -114,53 +122,68 @@ go mod tidy
 go build -o aqara-mcp-server
 ```
 
-After building, an `aqara-mcp-server` executable will be generated in the current directory.
+After building, you'll have an `aqara-mcp-server` executable in the current directory.
 
 ### Aqara Account Authentication
 
-To enable the MCP Server to access your Aqara account and control devices, you need to complete login authorization first.
+To enable MCP Server access to your Aqara account and device control, you must first complete login authorization.
 
-Please visit the following address to complete login authorization:
+Please visit the following URL to complete login authorization:
 **🔗 [https://cdn.aqara.com/app/mcpserver/login.html](https://cdn.aqara.com/app/mcpserver/login.html)**
 
-After successful login, you will obtain necessary authentication information (such as `token`, `region`), which will be used in subsequent configuration steps.
+After successful login, you'll receive necessary authentication information (such as `token`, `region`) for use in subsequent configuration steps.
 
-> ⚠️ **Security Reminder**: Please keep your `token` information secure and do not share it with others.
+> ⚠️ **Security Notice**: Please keep your `token` information secure and do not share with others.
 
 ### Client Configuration
 
-Different MCP clients have slightly different configuration methods. Here's an example of how to configure Claude for Desktop to use this MCP Server:
+Configuration methods vary slightly between different MCP clients. Here's an example of how to configure Claude for Desktop to use this MCP Server:
 
 #### Claude for Desktop Configuration Example
 
-1. Open Claude for Desktop Settings
+1. **Open Claude for Desktop Settings**
 
     ![Claude Open Setting](/readme/img/opening_setting.png)
 
-2. Switch to the Developer tab, then click Edit Config to open the configuration file with a text editor
+2. **Switch to the Developer tab, then click Edit Config to open the configuration file in a text editor**
 
     ![Claude Edit Configuration](/readme/img/edit_config.png)
 
-3. Add the configuration information from the "Login Success Page" to the client's configuration file `claude_desktop_config.json`
+3. **Add the configuration information from the "Login Success Page" to your client's configuration file `claude_desktop_config.json`**
+
+    ```json
+    {
+      "mcpServers": {
+        "aqara": {
+          "command": "/path/to/aqara-mcp-server",
+          "args": ["run", "stdio"],
+          "env": {
+            "token": "your_token_here",
+            "region": "your_region_here"
+          }
+        }
+      }
+    }
+    ```
 
     ![Configuration Example](/readme/img/config_info.png)
 
 #### Configuration Parameters
 
-- `command`: Full path to your downloaded or built `aqara-mcp-server` executable file
+- `command`: Full path to your downloaded or built `aqara-mcp-server` executable
 - `args`: Use `["run", "stdio"]` to start stdio transport mode
 - `env`: Environment variable configuration
-  - `token`: Access token obtained from the Aqara login page
-  - `region`: Your Aqara account region (e.g., CN, US, EU, etc.)
+  - `token`: Access token obtained from Aqara login page
+  - `region`: Your Aqara account region (supported regions: CN, US, EU, KR, SG, RU)
 
 #### Other MCP Clients
 
-For other clients that support the MCP protocol (such as ChatGPT, Cursor, etc.), the configuration is similar:
+For other MCP protocol-compatible clients (such as ChatGPT, Cursor, etc.), configuration is similar:
 
 - Ensure the client supports MCP protocol
-- Configure executable file path and startup parameters
+- Configure executable path and startup parameters
 - Set environment variables `token` and `region`
-- Choose appropriate transport protocol (stdio recommended)
+- Select appropriate transport protocol (recommend `stdio`)
 
 ### Starting the Service
 
@@ -168,23 +191,18 @@ For other clients that support the MCP protocol (such as ChatGPT, Cursor, etc.),
 
 Restart Claude for Desktop. You can then perform device control, device queries, scene execution, and other operations through natural language.
 
+Example conversations:
+
+- "Turn on the living room lights"
+- "Set the bedroom air conditioner to cooling mode at 24 degrees"
+- "Show me all devices in every room"
+- "Run the goodnight scene"
+
 ![Claude Chat Example](/readme/img/claude.png)
 
-#### HTTP Mode (Optional)
+#### HTTP Mode (Coming Soon)
 
-If you need to use HTTP mode, you can start it like this:
-
-```bash
-# Use default port 8080
-./aqara-mcp-server run http
-
-# Or specify custom host and port
-./aqara-mcp-server run http --host localhost --port 9000
-```
-
-Then use `["run", "http"]` parameters in the client configuration.
-
-## API Tools Documentation
+## API Tools Reference
 
 MCP clients can interact with Aqara smart home devices by calling these tools.
 
@@ -192,77 +210,75 @@ MCP clients can interact with Aqara smart home devices by calling these tools.
 
 #### device_control
 
-Control the status or attributes of smart home devices (e.g., switches, temperature, brightness, color, color temperature, etc.).
+Control smart home device states or attributes (such as power, temperature, brightness, color, color temperature, etc.).
 
 **Parameters:**
 
-- `endpoint_ids` _(Array\<Integer\>, required)_: List of device IDs to control
-- `control_params` _(Object, required)_: Control parameter object containing specific operations:
-  - `action` _(String, required)_: Operation to execute (e.g., `"on"`, `"off"`, `"set"`, `"up"`, `"down"`, `"cooler"`, `"warmer"`)
-  - `attribute` _(String, required)_: Device attribute to control (e.g., `"on_off"`, `"brightness"`, `"color_temperature"`, `"ac_mode"`)
-  - `value` _(String | Number, optional)_: Target value (required when action is "set")
-  - `unit` _(String, optional)_: Unit of the value (e.g., `"%"`, `"K"`, `"℃"`)
+- `endpoint_ids` _(Array\<Integer\>, Required)_: List of device IDs to control
+- `control_params` _(Object, Required)_: Control parameter object containing specific operations:
+  - `action` _(String, Required)_: Operation to execute (e.g., `"on"`, `"off"`, `"set"`, `"up"`, `"down"`, `"cooler"`, `"warmer"`)
+  - `attribute` _(String, Required)_: Device attribute to control (e.g., `"on_off"`, `"brightness"`, `"color_temperature"`, `"ac_mode"`)
+  - `value` _(String | Number, Optional)_: Target value (required when action is "set")
+  - `unit` _(String, Optional)_: Unit of the value (e.g., `"%"`, `"K"`, `"℃"`)
 
-**Returns:** Operation result message for device control
+**Returns:** Device control operation result message
 
 ### Device Query
 
 #### device_query
 
-Get device list based on specified location (room) and device type (does not include real-time status information).
+Get device list based on specified location (room) and device type (excludes real-time status information).
 
 **Parameters:**
 
-- `positions` _(Array\<String\>, optional)_: List of room names. Empty array means query all rooms
-- `device_types` _(Array\<String\>, optional)_: List of device types (e.g., `"Light"`, `"WindowCovering"`, `"AirConditioner"`, `"Button"`). Empty array means query all types
+- `positions` _(Array\<String\>, Optional)_: List of room names. Empty array queries all rooms
+- `device_types` _(Array\<String\>, Optional)_: List of device types (e.g., `"Light"`, `"WindowCovering"`, `"AirConditioner"`, `"Button"`). Empty array queries all types
 
-**Returns:** Markdown-formatted device list including device names and IDs
+**Returns:** Markdown formatted device list including device names and IDs
 
 #### device_status_query
 
-Get current status information of devices (for querying real-time status information like color, brightness, switches, etc.).
+Get current device status information (for querying real-time status like color, brightness, power state, etc.).
 
 **Parameters:**
 
-- `positions` _(Array\<String\>, optional)_: List of room names. Empty array means query all rooms
-- `device_types` _(Array\<String\>, optional)_: List of device types. Same options as `device_query`. Empty array means query all types
+- `positions` _(Array\<String\>, Optional)_: List of room names. Empty array queries all rooms
+- `device_types` _(Array\<String\>, Optional)_: List of device types. Same options as `device_query`. Empty array queries all types
 
-**Returns:** Markdown-formatted device status information
+**Returns:** Markdown formatted device status information
 
 #### device_log_query
 
-Query historical log information of devices.
+Query device historical log information.
 
 **Parameters:**
 
-- `endpoint_ids` _(Array\<Integer\>, required)_: List of device IDs to query history for
-- `start_datetime` _(String, optional)_: Query start time in format `YYYY-MM-DD HH:MM:SS` (e.g., `"2023-05-16 12:00:00"`)
-- `end_datetime` _(String, optional)_: Query end time in format `YYYY-MM-DD HH:MM:SS`
-- `attribute` _(String, optional)_: Specific device attribute name to query (e.g., `on_off`, `brightness`). Queries all recorded attributes when not provided
+- `endpoint_ids` _(Array\<Integer\>, Required)_: List of device IDs to query history for
+- `start_datetime` _(String, Optional)_: Query start time in format `YYYY-MM-DD HH:MM:SS` (e.g., `"2023-05-16 12:00:00"`)
+- `end_datetime` _(String, Optional)_: Query end time in format `YYYY-MM-DD HH:MM:SS`
+- `attributes` _(Array\<String\>, Optional)_: List of device attribute names to query (e.g., `["on_off", "brightness"]`). Queries all recorded attributes if not provided
 
-**Returns:** Markdown-formatted device historical status information
-
-> 📝 **Note:** Current implementation may show "This feature will be available soon.", indicating the feature is pending completion.
+**Returns:** Markdown formatted device historical status information
 
 ### Scene Management
 
 #### get_scenes
 
-Query all scenes in the user's home, or scenes within specified rooms.
+Query all scenes under user's home, or scenes within specified rooms.
 
 **Parameters:**
 
-- `positions` _(Array\<String\>, optional)_: List of room names. Empty array means query scenes for the entire home
+- `positions` _(Array\<String\>, Optional)_: List of room names. Empty array queries entire home's scenes
 
-**Returns:** Markdown-formatted scene information
+**Returns:** Markdown formatted scene information
 
 #### run_scenes
 
-Execute specified scenes based on scene IDs.
+Execute specified scenes by scene ID.
 
 **Parameters:**
 
-- `scenes` _(Array\<Integer\>, required)_: List of scene IDs to execute
+- `scenes` _(Array\<Integer\>, Required)_: List of scene IDs to execute
 
 **Returns:** Scene execution result message
 
@@ -270,7 +286,7 @@ Execute specified scenes based on scene IDs.
 
 #### get_homes
 
-Get list of all homes under the user account.
+Get list of all homes under user account.
 
 **Parameters:** None
 
@@ -278,11 +294,11 @@ Get list of all homes under the user account.
 
 #### switch_home
 
-Switch the user's current operating home. After switching, subsequent device queries, controls, and other operations will target the newly switched home.
+Switch user's current operating home. After switching, subsequent device queries, controls, and other operations will target the newly switched home.
 
 **Parameters:**
 
-- `home_name` _(String, required)_: Name of the target home
+- `home_name` _(String, Required)_: Name of target home
 
 **Returns:** Switch operation result message
 
@@ -290,17 +306,19 @@ Switch the user's current operating home. After switching, subsequent device que
 
 #### automation_config
 
-Configure scheduled or delayed device control tasks (currently only supports timed delay automation configuration).
+Automation configuration (currently supports only scheduled or delayed device control tasks).
 
 **Parameters:**
 
-- `scheduled_time` _(String, required)_: Set time point (if delay task, converted based on current time), format `YYYY-MM-DD HH:MM:SS` (e.g., `"2025-05-16 12:12:12"`)
-- `endpoint_ids` _(Array\<Integer\>, required)_: List of device IDs for scheduled control
-- `control_params` _(Object, required)_: Device control parameters using the same format as `device_control` tool (including action, attribute, value, etc.)
+- `scheduled_time` _(String, Required)_: Scheduled execution time using standard Crontab format `"minute hour day month weekday"`. Examples: `"30 14 * * *"` (daily at 14:30), `"0 9 * * 1"` (Mondays at 9:00)
+- `endpoint_ids` _(Array\<Integer\>, Required)_: List of device IDs for scheduled control
+- `control_params` _(Object, Required)_: Device control parameters using same format as `device_control` tool (including action, attribute, value, etc.)
+- `task_name` _(String, Required)_: Name or description of this automation task (for identification and management)
+- `execution_once` _(Boolean, Optional)_: Whether to execute only once
+  - `true`: Execute task only once at specified time (default)
+  - `false`: Execute task periodically (daily, weekly, etc.)
 
 **Returns:** Automation configuration result message
-
-> 📝 **Note:** Current implementation may show "This feature will be available soon.", indicating the feature is pending completion.
 
 ## Project Structure
 
@@ -308,31 +326,31 @@ Configure scheduled or delayed device control tasks (currently only supports tim
 
 ```text
 .
-├── cmd.go                # Cobra CLI command definition and program entry point (contains main function)
-├── server.go             # MCP server core logic, tool definition and request handling
+├── cmd.go                # Cobra CLI command definitions and program entry point (contains main function)
+├── server.go             # MCP server core logic, tool definitions, and request handling
 ├── smh.go                # Aqara smart home platform API interface wrapper
 ├── middleware.go         # Middleware: user authentication, timeout control, exception recovery
 ├── config.go             # Global configuration management and environment variable handling
 ├── go.mod                # Go module dependency management file
 ├── go.sum                # Go module dependency checksum file
 ├── readme/               # README documentation and image resources
-│   ├── img/              # Image resource directory
+│   ├── img/              # Image resources directory
 │   └── *.md              # Multi-language README files
 ├── LICENSE               # MIT open source license
 └── README.md             # Main project documentation
 ```
 
-### Core Files Description
+### Core Files
 
-- **`cmd.go`**: Cobra framework-based CLI implementation, defining `run stdio` and `run http` startup modes and main entry function
-- **`server.go`**: MCP server core implementation, responsible for tool registration, request handling, and protocol support
-- **`smh.go`**: Aqara smart home platform API wrapper layer, providing device control, authentication, and multi-home support
-- **`middleware.go`**: Request processing middleware, providing authentication verification, timeout control, and exception handling
-- **`config.go`**: Global configuration management, responsible for environment variable handling and API configuration
+- **`cmd.go`**: Cobra framework-based CLI implementation defining `run stdio` and `run http` startup modes and main entry function
+- **`server.go`**: MCP server core implementation responsible for tool registration, request handling, and protocol support
+- **`smh.go`**: Aqara smart home platform API wrapper layer providing device control, authentication, and multi-home support
+- **`middleware.go`**: Request processing middleware providing authentication verification, timeout control, and exception handling
+- **`config.go`**: Global configuration management responsible for environment variable processing and API configuration
 
 ## Development Guide
 
-Contributions are welcome through submitting Issues or Pull Requests!
+We welcome contributions through Issues and Pull Requests!
 
 Before submitting code, please ensure:
 
@@ -342,8 +360,14 @@ Before submitting code, please ensure:
 4. Update relevant documentation (such as this README) if necessary
 5. Ensure your commit messages are clear and descriptive
 
+**🌟 If this project helps you, please give us a Star!**
+
+**🤝 Welcome to join our community and make smart homes smarter together!**
+
 ## License
 
 This project is licensed under the [MIT License](/LICENSE).
+
+---
 
 Copyright (c) 2025 Aqara-Copilot
