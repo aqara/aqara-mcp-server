@@ -84,7 +84,7 @@ func DeviceControl(devices []int, slots map[string]any) string {
 	if len(devices) == 0 {
 		return "Device list cannot be empty"
 	}
-	if slots == nil {
+	if len(slots) == 0 {
 		return "Control parameters cannot be empty"
 	}
 
@@ -189,7 +189,7 @@ func GetHomes() ([]string, string) {
 	if result == nil {
 		return nil, "No homes available"
 	}
-	return *result, err
+	return *result, ""
 }
 
 // SwitchHome switches the current user home.
@@ -207,9 +207,77 @@ func SwitchHome(homeName string) (bool, string) {
 		return false, message
 	}
 	if result == nil {
-		return false, "Home switch failed"
+		return false, "Home switch failed: no response from server"
 	}
-	return true, message
+	return true, ""
+}
+
+// AutomationConfig configures a scheduled device control task.
+func AutomationConfig(scheduledTime string, endpointIDs []int, controlParams map[string]any, taskName string, executionOnce bool) string {
+	if strings.TrimSpace(scheduledTime) == "" {
+		return "Scheduled time cannot be empty"
+	}
+	if len(endpointIDs) == 0 {
+		return "Device list cannot be empty"
+	}
+	if len(controlParams) == 0 {
+		return "Control parameters cannot be empty"
+	}
+	if strings.TrimSpace(taskName) == "" {
+		return "Task name cannot be empty"
+	}
+
+	data := map[string]any{
+		"scheduled_time": strings.TrimSpace(scheduledTime),
+		"devices":        endpointIDs,
+		"slots":          []map[string]any{controlParams},
+		"task_name":      strings.TrimSpace(taskName),
+		"execution_once": executionOnce,
+	}
+
+	_, message := CallService[string]("AutomationConfig", data)
+	if message != "" {
+		return message
+	}
+	return "Automation configuration successful"
+}
+
+// DeviceLogQuery queries device historical log information
+func DeviceLogQuery(endpointIDs []int, startDatetime, endDatetime string, attributes []string) string {
+	log.Printf("[INFO] [DeviceLogQuery] Querying device logs for endpoints: %v, start: %s, end: %s, attributes: %v",
+		endpointIDs, startDatetime, endDatetime, attributes)
+
+	if len(endpointIDs) == 0 {
+		return "Device list cannot be empty"
+	}
+
+	timeSpan := make([]string, 0)
+
+	// Add optional parameters if provided
+	if strings.TrimSpace(startDatetime) != "" {
+		timeSpan = append(timeSpan, strings.TrimSpace(startDatetime))
+	}
+	if strings.TrimSpace(endDatetime) != "" {
+		timeSpan = append(timeSpan, strings.TrimSpace(endDatetime))
+	}
+
+	data := map[string]any{
+		"devices":   endpointIDs,
+		"time_span": timeSpan,
+	}
+
+	if len(attributes) > 0 {
+		data["attributes"] = attributes
+	}
+
+	result, message := CallService[string]("DeviceLogQuery", data)
+	if message != "" {
+		return message
+	}
+	if result == nil {
+		return "No device log data available"
+	}
+	return *result
 }
 
 // CallService calls the specific service with payload and returns parsed result and error message.

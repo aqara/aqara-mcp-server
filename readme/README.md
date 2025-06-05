@@ -1,7 +1,7 @@
 <div align="center" style="display: flex; align-items: center; justify-content: center; ">
 
   <img src="/readme/img/logo.png" alt="Aqara Logo" height="120">
-  <h1>MCP Server</h1>
+  <h1>Aqara MCP Server</h1>
 
 </div>
 

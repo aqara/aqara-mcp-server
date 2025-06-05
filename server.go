@@ -95,8 +95,8 @@ Returns:
 		mcp.WithString("end_datetime",
 			mcp.Description(`End time (format: YYYY-MM-DD HH:MM:SS, e.g., 2025-05-16 12:12:12)`),
 		),
-		mcp.WithString("attribute",
-			mcp.Description("The attribute of the device to query log for (e.g., on_off, brightness)."),
+		mcp.WithArray("attributes",
+			mcp.Description("List of device attributes to query logs for (e.g., [\"on_off\", \"brightness\"])."),
 		),
 	)
 
@@ -146,7 +146,7 @@ Returns:
 	Automation configuration result message`),
 		mcp.WithString("scheduled_time",
 			mcp.Required(),
-			mcp.Description("The scheduled time point (converted based on the current time if it's a delayed task) (format: YYYY-MM-DD HH:MM:SS, e.g., 2025-05-16 12:12:12)"),
+			mcp.Description("Scheduled execution time using standard Crontab format \"minute hour day month weekday\". Examples: \"30 14 * * *\" (execute daily at 14:30), \"0 9 * * 1\" (execute every Monday at 9:00)"),
 		),
 		mcp.WithArray("endpoint_ids",
 			mcp.Required(),
@@ -155,6 +155,13 @@ Returns:
 		mcp.WithObject("control_params",
 			mcp.Required(),
 			mcp.Description("Device control parameters, using the same format as 'control_params' in the 'device_control' tool (including action, attribute, value, etc.)."),
+		),
+		mcp.WithString("task_name",
+			mcp.Required(),
+			mcp.Description("Name or description for this automation task (used for identification and management)."),
+		),
+		mcp.WithBoolean("execution_once",
+			mcp.Description("Whether to execute only once. false: Execute the task periodically and repeatedly (such as daily, weekly, etc.) (type: Boolean, default true)"),
 		),
 	)
 
@@ -189,11 +196,10 @@ Returns:
 			log.Fatalln("Http should not be nil")
 		} else {
 			baseURL := host + ":" + port
+			log.Printf("HTTP server listening on %s\n", baseURL)
 			// Start the server
 			if err := startServer.Start(baseURL); err != nil {
 				log.Fatalf("HTTP Server error: %v\n", err)
-			} else {
-				log.Printf("HTTP server listening on %s\n", baseURL)
 			}
 		}
 	} else {
@@ -286,25 +292,41 @@ func DeviceStatusQueryHandler(ctx context.Context, request mcp.CallToolRequest) 
 }
 
 // DeviceLogQueryHandler handles device log query requests.
-// Currently, this feature is not implemented and returns a placeholder message.
 func DeviceLogQueryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	log.Printf("[INFO] [DeviceLogQueryHandler] Request parameters: %+v", request.Params.Arguments)
-	endpointIDsFloat, err := extractSlice[float64](request.GetArguments()["endpoint_ids"])
+
+	endpointIDsFloat, err := request.RequireFloatSlice("endpoint_ids")
 	if err != nil {
 		log.Printf("[ERROR] [DeviceLogQueryHandler] 'endpoint_ids' parameter error: %v, value: %+v", err, request.GetArguments()["endpoint_ids"])
 		return mcp.NewToolResultText("Invalid 'endpoint_ids' parameter: must be a list of numbers"), nil
 	}
+
 	var endpointIDs []int
 	for _, floatVal := range endpointIDsFloat {
 		endpointIDs = append(endpointIDs, int(floatVal))
 	}
+
 	if len(endpointIDs) == 0 {
 		log.Printf("[WARN] [DeviceLogQueryHandler] 'endpoint_ids' is empty: %+v", endpointIDsFloat)
 		return mcp.NewToolResultText("Please provide valid device IDs."), nil
 	}
-	// TODO: Implement device log fetching logic.
-	// Parameters like start_datetime, end_datetime, attribute would be used here.
-	return mcp.NewToolResultText("This feature will be available soon."), nil
+
+	// Extract optional parameters
+	startDatetime, _ := request.RequireString("start_datetime")
+	endDatetime, _ := request.RequireString("end_datetime")
+	attributes, err := extractSlice[string](request.GetArguments()["attributes"])
+	if err != nil {
+		log.Printf("[ERROR] [DeviceLogQueryHandler] 'attributes' parameter error: %v, value: %+v", err, request.GetArguments()["attributes"])
+		return mcp.NewToolResultText("Invalid 'attributes' parameter: must be a list of strings"), nil
+	}
+
+	log.Printf("[INFO] [DeviceLogQueryHandler] Calling DeviceLogQuery, endpointIDs: %+v, startDatetime: %s, endDatetime: %s, attributes: %v",
+		endpointIDs, startDatetime, endDatetime, attributes)
+
+	result := DeviceLogQuery(endpointIDs, startDatetime, endDatetime, attributes)
+	log.Printf("[INFO] [DeviceLogQueryHandler] DeviceLogQuery result: %v", result)
+
+	return mcp.NewToolResultText(result), nil
 }
 
 // GetScenesHandler handles querying available scenes.
@@ -415,12 +437,29 @@ func AutomationConfigHandler(ctx context.Context, request mcp.CallToolRequest) (
 		return mcp.NewToolResultText("Invalid 'control_params' parameter: expected an object"), nil
 	}
 
-	// Log the intended automation task
-	log.Printf("[INFO] [AutomationConfigHandler] Received automation task configuration:\n  Scheduled Time: %s\n  Endpoint IDs: %v\n  Control Params: %+v",
-		scheduledTime, endpointIDs, controlParams)
+	taskName, ok := extractString(request.GetArguments()["task_name"])
+	if !ok || taskName == "" {
+		log.Printf("[ERROR] [AutomationConfigHandler] 'task_name' parameter error or empty: %+v", request.GetArguments()["task_name"])
+		return mcp.NewToolResultText("Invalid or missing 'task_name' parameter: expected a non-empty string"), nil
+	}
 
-	// TODO: Implement automation config logic.
-	return mcp.NewToolResultText("This feature will be available soon."), nil
+	// Use extractBool helper function for better type handling
+	executionOnce := true // default value
+	if execOnceValue, exists := request.GetArguments()["execution_once"]; exists {
+		if boolVal, ok := execOnceValue.(bool); ok {
+			executionOnce = boolVal
+		} else {
+			log.Printf("[WARN] [AutomationConfigHandler] 'execution_once' parameter type error, using default true: %+v", execOnceValue)
+		}
+	}
+
+	log.Printf("[INFO] [AutomationConfigHandler] Calling AutomationConfig, scheduledTime: %s, endpointIDs: %v, controlParams: %+v, taskName: %s, executionOnce: %t",
+		scheduledTime, endpointIDs, controlParams, taskName, executionOnce)
+
+	result := AutomationConfig(scheduledTime, endpointIDs, controlParams, taskName, executionOnce)
+	log.Printf("[INFO] [AutomationConfigHandler] AutomationConfig result: %v", result)
+
+	return mcp.NewToolResultText(result), nil
 }
 
 // extractSlice extracts a typed slice from an interface{}.

@@ -1,7 +1,7 @@
 <div align="center" style="display: flex; align-items: center; justify-content: center; ">
 
   <img src="/readme/img/logo.png" alt="Aqara Logo" height="120">
-  <h1>MCP Server</h1>
+  <h1>Aqara MCP Server</h1>
 
 </div>
 
@@ -35,7 +35,7 @@ Aqara MCP Server 是一个基于 [MCP (Model Context Protocol)](https://modelcon
     - [其他 MCP 客户端](#其他-mcp-客户端)
   - [启动服务](#启动服务)
     - [标准模式（推荐）](#标准模式推荐)
-    - [HTTP 模式（可选）](#http-模式可选)
+    - [HTTP 模式（`即将支持`）](#http-模式即将支持)
 - [API 工具说明](#api-工具说明)
   - [设备控制类](#设备控制类)
     - [device\_control](#device_control)
@@ -59,34 +59,42 @@ Aqara MCP Server 是一个基于 [MCP (Model Context Protocol)](https://modelcon
 
 ## 特性
 
-- **全面的设备控制**：支持对 Aqara 智能设备的开关、亮度、色温、模式等多种属性进行精细控制
-- **灵活的设备查询**：能够按房间、设备类型查询设备列表及其详细状态
-- **智能场景管理**：支持查询和执行用户预设的智能家居场景
-- **设备历史记录**：查询设备在指定时间范围内的历史状态变更记录
-- **自动化配置**：支持配置定时或延时设备控制任务
-- **多家庭支持**：支持查询和切换用户账户下的不同家庭
-- **MCP 协议兼容**：完全遵循 MCP 协议规范，易于与各类 AI 助手集成
-- **安全认证机制**：采用基于登录授权+签名的安全认证，保护用户数据和设备安全
-- **跨平台运行**：基于 Go 语言开发，可编译为多平台可执行文件
-- **易于扩展**：模块化设计，可以方便地添加新的工具和功能
+- ✨ **全面的设备控制**：支持对 Aqara 智能设备的开关、亮度、色温、模式等多种属性进行精细控制
+- 🔍 **灵活的设备查询**：能够按房间、设备类型查询设备列表及其详细状态
+- 🎬 **智能场景管理**：支持查询和执行用户预设的智能家居场景
+- 📈 **设备历史记录**：查询设备在指定时间范围内的历史状态变更记录
+- ⏰ **自动化配置**：支持配置定时或延时设备控制任务
+- 🏠 **多家庭支持**：支持查询和切换用户账户下的不同家庭
+- 🔌 **MCP 协议兼容**：完全遵循 MCP 协议规范，易于与各类 AI 助手集成
+- 🔐 **安全认证机制**：采用基于登录授权+签名的安全认证，保护用户数据和设备安全
+- 🌐 **跨平台运行**：基于 Go 语言开发，可编译为多平台可执行文件
+- 🔧 **易于扩展**：模块化设计，可以方便地添加新的工具和功能
 
 ## 工作原理
 
 Aqara MCP Server 作为 AI 助手与 Aqara 智能家居平台之间的桥梁：
 
-1. **AI 助手 (MCP 客户端)**：用户通过 AI 助手发出指令（例如，"打开客厅的灯"）
+```mermaid
+graph LR
+    A[AI 助手] --> B[MCP 客户端]
+    B --> C[Aqara MCP Server]
+    C --> D[Aqara 云端 API]
+    D --> E[智能设备]
+```
+
+1. **AI 助手**：用户通过 AI 助手发出指令（例如，"打开客厅的灯"）
 2. **MCP 客户端**：将用户指令解析，并根据 MCP 协议调用 Aqara MCP Server 提供的相应工具（例如 `device_control`）
-3. **Aqara MCP Server (本项目)**：接收来自客户端的请求，验证后调用 `smh.go` 模块
-4. **`smh.go` 模块**：使用配置好的 Aqara 凭据，与 Aqara 云端 API 进行通信，执行实际的设备操作或数据查询
-5. **响应流程**：Aqara 云端 API 返回结果，经由 Aqara MCP Server 传递回 MCP 客户端，最终呈现给用户
+3. **Aqara MCP Server (本项目)**：接收来自客户端的请求，使用配置好的 Aqara 凭据，与 Aqara 云端 API 进行通信，执行实际的设备操作或数据查询
+4. **响应流程**：Aqara 云端 API 返回结果，经由 Aqara MCP Server 传递回 MCP 客户端，最终呈现给用户
 
 ## 快速开始
 
 ### 先决条件
 
-- Go (版本 1.24 或更高)
-- Git (用于从源码构建)
-- Aqara 账户及已绑定的智能设备
+- **Go** (版本 1.24 或更高) - 仅在从源码构建时需要
+- **Git** (用于从源码构建) - 可选
+- **Aqara 账户**及已绑定的智能设备
+- **支持 MCP 协议的客户端** (如 Claude for Desktop、Cursor 等)
 
 ### 安装
 
@@ -133,15 +141,30 @@ go build -o aqara-mcp-server
 
 #### Claude for Desktop 配置示例
 
-1. 打开 Claude for Desktop 的设置 (Settings)
+1. **打开 Claude for Desktop 的设置 (Settings)**
 
     ![Claude Open Setting](/readme/img/opening_setting.png)
 
-2. 切换到开发者 (Developer) 标签页，然后点击编辑配置 (Edit Config)，使用文本编辑器打开配置文件
+2. **切换到开发者 (Developer) 标签页，然后点击编辑配置 (Edit Config)，使用文本编辑器打开配置文件**
 
     ![Claude Edit Configuration](/readme/img/edit_config.png)
 
-3. 将"登录成功页面"的配置信息，添加到客户端的配置文件 `claude_desktop_config.json` 中
+3. **将"登录成功页面"的配置信息，添加到客户端的配置文件 `claude_desktop_config.json` 中**
+
+    ```json
+    {
+      "mcpServers": {
+        "aqara": {
+          "command": "/path/to/aqara-mcp-server",
+          "args": ["run", "stdio"],
+          "env": {
+            "token": "your_token_here",
+            "region": "your_region_here"
+          }
+        }
+      }
+    }
+    ```
 
     ![Configuration Example](/readme/img/config_info.png)
 
@@ -151,7 +174,7 @@ go build -o aqara-mcp-server
 - `args`: 使用 `["run", "stdio"]` 启动 stdio 传输模式
 - `env`: 环境变量配置
   - `token`: 从 Aqara 登录页面获取的访问令牌
-  - `region`: 您的 Aqara 账户所在区域（如 CN、US、EU 等）
+  - `region`: 您的 Aqara 账户所在区域（支持的区域：CN、US、EU、KR、SG、RU）
 
 #### 其他 MCP 客户端
 
@@ -168,21 +191,16 @@ go build -o aqara-mcp-server
 
 重启 Claude for Desktop。然后就可以通过自然语言执行设备控制、设备查询、场景执行等操作。
 
+示例对话：
+
+- "打开客厅的灯"
+- "把卧室空调设置为制冷模式，温度 24 度"
+- "查看所有房间的设备列表"
+- "执行晚安场景"
+
 ![Claude Chat Example](/readme/img/claude.png)
 
-#### HTTP 模式（可选）
-
-如果您需要使用 HTTP 模式，可以这样启动：
-
-```bash
-# 使用默认端口 8080
-./aqara-mcp-server run http
-
-# 或指定自定义主机和端口
-./aqara-mcp-server run http --host localhost --port 9000
-```
-
-然后在客户端配置中使用 `["run", "http"]` 参数。
+#### HTTP 模式（`即将支持`）
 
 ## API 工具说明
 
@@ -238,11 +256,9 @@ MCP 客户端可以通过调用这些工具与 Aqara 智能家居设备进行交
 - `endpoint_ids` _(Array\<Integer\>, 必需)_：需要查询历史记录的设备 ID 列表
 - `start_datetime` _(String, 可选)_：查询起始时间，格式为 `YYYY-MM-DD HH:MM:SS`（例如：`"2023-05-16 12:00:00"`）
 - `end_datetime` _(String, 可选)_：查询结束时间，格式为 `YYYY-MM-DD HH:MM:SS`
-- `attribute` _(String, 可选)_：要查询的特定设备属性名称（如 `on_off`, `brightness`）。未提供时查询所有已记录属性
+- `attributes` _(Array\<String\>, 可选)_：要查询的设备属性名称列表（如 `["on_off", "brightness"]`）。未提供时查询所有已记录属性
 
 **返回：** Markdown 格式的设备历史状态信息
-
-> 📝 **注意：** 当前实现可能提示 "This feature will be available soon."，表示功能待完善。
 
 ### 场景管理类
 
@@ -290,17 +306,19 @@ MCP 客户端可以通过调用这些工具与 Aqara 智能家居设备进行交
 
 #### automation_config
 
-配置定时或延时设备控制任务（目前仅支持定延时自动化配置）。
+自动化配置（目前仅支持定时或延时设备控制任务）。
 
 **参数：**
 
-- `scheduled_time` _(String, 必需)_：设置的时间点（如果是延时任务，基于当前时间点转化），格式为 `YYYY-MM-DD HH:MM:SS`（例如：`"2025-05-16 12:12:12"`）
+- `scheduled_time` _(String, 必需)_：定时执行的时间点，使用标准 Crontab 格式 `"分 时 日 月 周"`。例如：`"30 14 * * *"`（每天14:30执行）、`"0 9 * * 1"`（每周一9:00执行）
 - `endpoint_ids` _(Array\<Integer\>, 必需)_：需要定时控制的设备 ID 列表
 - `control_params` _(Object, 必需)_：设备控制参数，使用与 `device_control` 工具相同的格式（包含 action、attribute、value 等）
+- `task_name` _(String, 必需)_：此自动化任务的名称或描述（用于识别和管理）
+- `execution_once` _(Boolean, 可选)_：是否只执行一次
+  - `true`：仅在指定时间执行一次任务（默认值）
+  - `false`：周期性重复执行任务（如每天、每周等）
 
 **返回：** 自动化配置结果消息
-
-> 📝 **注意：** 当前实现可能提示 "This feature will be available soon."，表示功能待完善。
 
 ## 项目结构
 
@@ -342,8 +360,14 @@ MCP 客户端可以通过调用这些工具与 Aqara 智能家居设备进行交
 4. 如有必要，更新相关的文档（如本 README）
 5. 确保您的提交信息清晰明了
 
+**🌟 如果这个项目对您有帮助，请给我们一个 Star！**
+
+**🤝 欢迎加入我们的社区，一起让智能家居更智能！**
+
 ## 许可证
 
 本项目基于 [MIT License](/LICENSE) 授权。
+
+---
 
 Copyright (c) 2025 Aqara-Copilot
