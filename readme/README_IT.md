@@ -143,7 +143,7 @@ Scegli il metodo di installazione che si adatta alle tue esigenze:
           "type": "http",
           "url": "https://[mcp-server-domain]/echo/mcp",  // base_url
           "headers": {
-            "Authorization": "Bearer [YOUR_API_KEY_HERE]"  // api_key
+            "Authorization": "[YOUR_API_KEY_HERE]"  // api_key
           }
         }
       }
