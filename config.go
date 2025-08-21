@@ -1,10 +1,10 @@
 package main
 
 import (
+	"context"
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/hex"
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -17,16 +17,18 @@ import (
 
 // Global variables
 var (
-	Token           = ""
-	Region          = ""
-	DeviceID        = ""
-	AppID           = ""
-	AppSecret       = ""
-	MCPCloudAPIBase = ""
+	CloudApiKey               = strings.TrimSpace(os.Getenv("AQARA_API_KEY"))
+	CloudAPIBase              = strings.TrimSpace(os.Getenv("AQARA_BASE_URL")) // http://host:port/echo/
+	DeviceID                  = ""
+	AppID                     = ""
+	AppSecret                 = ""
+	Verbose                   = false
+	CloudMode                 = strings.ToLower(os.Getenv("cloud_mode")) == "true"
+	CloudCtxFromEnv *CloudCtx = nil
 )
 
 const (
-	Version                         = "0.0.1"
+	Version                         = "0.0.3"
 	RequestSignatureHeaderAccessKey = "X-Access-Key"
 	RequestSignatureHeaderSignature = "X-Signature"
 	RequestSignatureHeaderTimestamp = "X-Timestamp"
@@ -36,16 +38,16 @@ const (
 )
 
 func init() {
-	Token = os.Getenv("token")
-	Region = strings.ToUpper(os.Getenv("region"))
-	DeviceID = genDeviceID()
-	MCPCloudAPIBase = getCloudAPIBase()
-	AppID = genAppID()
-	AppSecret = genSecret()
+	if !CloudMode {
+		DeviceID = genDeviceID()
+		AppID = genAppID()
+		AppSecret = genSecret()
+	}
+	Verbose = os.Getenv("verbose") == "true"
 }
 
 func genSecret() string {
-	url := MCPCloudAPIBase + "/mcp/secret"
+	url := CloudAPIBase + "/secret"
 	result, err := httpGet[map[string]string](url, map[string]string{"key": AppID})
 	if err != nil {
 		log.Printf("[ERROR] Failed to generate secret: %v", err)
@@ -60,32 +62,6 @@ func genSecret() string {
 	}
 	log.Printf("[WARN] Secret key not found in response")
 	return ""
-}
-
-func getCloudAPIBase() string {
-	var apiHost string
-	switch Region {
-	case "CN":
-		apiHost = "https://ai-echo.aqara.cn"
-	case "KR":
-		apiHost = "https://ai-echo-kr.aqara.com"
-	case "SG":
-		apiHost = "https://ai-echo-sg.aqara.com"
-	case "US":
-		apiHost = "https://ai-echo-us.aqara.com"
-	case "EU":
-		apiHost = "https://ai-echo-ger.aqara.com"
-	case "RU":
-		apiHost = "https://ai-echo-ru.aqara.com"
-
-	case "TEST":
-		apiHost = "https://ai-echo-test.aqara.cn"
-	case "DEV":
-		apiHost = "http://localhost:5000"
-	default:
-		apiHost = "https://ai-echo-us.aqara.com"
-	}
-	return fmt.Sprintf("%s/echo", apiHost)
 }
 
 // genDeviceID generates a unique device identifier.
@@ -127,4 +103,18 @@ func md5Hash(str string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(str))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func getCloudCtx(ctx context.Context) CloudCtx {
+	if CloudCtxFromEnv != nil {
+		return *CloudCtxFromEnv
+	}
+	cloudCtxAny := ctx.Value(CloudCtx{})
+	if cloudCtxAny == nil {
+		return CloudCtx{
+			ApiBase: CloudAPIBase,
+			ApiKey:  CloudApiKey,
+		}
+	}
+	return cloudCtxAny.(CloudCtx)
 }

@@ -1,16 +1,12 @@
 package main
 
 import (
-	"fmt" // Imported for potential use, e.g., error printing
+	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-)
-
-var (
-	// verbose toggles verbose output mode.
-	verbose bool
 )
 
 var (
@@ -20,6 +16,7 @@ var (
 		Short:   "Aqara MCP Server",
 		Long:    `Aqara MCP Server - Manage your Aqara devices and services through the MCP protocol.`,
 		Version: Version,
+		Run:     runDefaultServer,
 	}
 
 	// runCmd represents the base for 'run' subcommands.
@@ -37,24 +34,41 @@ var (
 		Run:   runStdioServer,
 	}
 
-	// streamableHTTPServerCmd represents the command to start the server with StreamableHTTP transport.
+	// httpCmd represents the command to start the server with StreamableHTTP transport.
 	httpCmd = &cobra.Command{
 		Use:   "http",
 		Short: "Start server with streamablehttp transport",
 		Long:  `Starts the Aqara MCP server communicating via StreamableHTTP, typically using JSON-RPC messages over HTTP.`,
 		Run:   runStreamableHTTPServer,
 	}
+
+	// sseCmd represents the command to start the server with SSE transport.
+	sseCmd = &cobra.Command{
+		Use:   "sse",
+		Short: "Start server with SSE transport",
+		Long:  `Starts the Aqara MCP server communicating via Server-Sent Events (SSE), typically using JSON-RPC messages over HTTP streams.`,
+		Run:   runSSEServer,
+	}
 )
 
 // runStdioServer is the function executed by the stdioCmd.
 func runStdioServer(cmd *cobra.Command, args []string) {
-	// fmt.Println("Starting server with stdio transport...")
 	serverStart("stdio")
 }
 
-// runStreamableHTTPServer is the function executed by the sseCmd.
+// runStreamableHTTPServer is the function executed by the httpCmd.
 func runStreamableHTTPServer(cmd *cobra.Command, args []string) {
-	// fmt.Println("Starting server with StreamableHTTPServer transport...")
+	serverStart("http")
+}
+
+// runSSEServer is the function executed by the sseCmd.
+func runSSEServer(cmd *cobra.Command, args []string) {
+	serverStart("sse")
+}
+
+// runDefaultServer is the default function executed when no subcommand is specified.
+func runDefaultServer(cmd *cobra.Command, args []string) {
+	log.Println("Starting Aqara MCP Server with default http transport...")
 	serverStart("http")
 }
 
@@ -73,12 +87,12 @@ func main() {
 
 func init() {
 	// Persistent flags are global for the application.
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Enable verbose output")
 
 	// Flags specific to SSE server, but defined as persistent for potential broader use or simplification.
 	// Alternatively, they could be local flags for sseCmd.
-	rootCmd.PersistentFlags().String("host", "localhost", "The host address for the SSE server.")
-	rootCmd.PersistentFlags().String("port", "8080", "The port for the SSE server.")
+	rootCmd.PersistentFlags().String("host", "0.0.0.0", "The host address for the Streamable-HTTP server.")
+	rootCmd.PersistentFlags().String("port", "8000", "The port for the SSE server.")
 
 	// Bind these flags to viper keys for configuration management.
 	// Errors are ignored here as per original, but consider handling them.
@@ -89,5 +103,6 @@ func init() {
 	// Add subcommands.
 	runCmd.AddCommand(stdioCmd)
 	runCmd.AddCommand(httpCmd)
+	runCmd.AddCommand(sseCmd)
 	rootCmd.AddCommand(runCmd)
 }

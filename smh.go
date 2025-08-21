@@ -37,7 +37,6 @@ type HomeEntity struct {
 // RequestBody defines the general API request payload.
 type RequestBody struct {
 	Token     string `json:"token"`
-	Region    string `json:"region"`
 	Version   string `json:"version"`
 	Fn        string `json:"fn"`
 	Params    any    `json:"params"`
@@ -53,10 +52,15 @@ type RespBody[T any] struct {
 	MsgDetails string `json:"msgDetails"`
 }
 
+type CloudCtx struct {
+	ApiBase string
+	ApiKey  string
+}
+
 // ---------- API Wrappers ----------
 
 // Login authenticates a user and returns the login result and error message, if any.
-func Login(username, password, region string) (*LoginResult, string) {
+func Login(username, password, region string, cloudCtx CloudCtx) (*LoginResult, string) {
 	if strings.TrimSpace(username) == "" {
 		return nil, "Username cannot be empty"
 	}
@@ -75,12 +79,12 @@ func Login(username, password, region string) (*LoginResult, string) {
 		Username: strings.TrimSpace(username),
 		Password: strings.TrimSpace(password),
 		Region:   strings.ToUpper(strings.TrimSpace(region)),
-	})
+	}, cloudCtx)
 	return result, err
 }
 
 // DeviceControl sends a device control command.
-func DeviceControl(devices []int, slots map[string]any) string {
+func DeviceControl(devices []int, slots map[string]any, cloudCtx CloudCtx) string {
 	if len(devices) == 0 {
 		return "Device list cannot be empty"
 	}
@@ -92,7 +96,7 @@ func DeviceControl(devices []int, slots map[string]any) string {
 		"devices": devices,
 		"slots":   []map[string]any{slots},
 	}
-	_, message := CallService[string]("DeviceControl", data)
+	_, message := CallService[string]("DeviceControl", data, cloudCtx)
 	if message != "" {
 		return message
 	}
@@ -100,7 +104,7 @@ func DeviceControl(devices []int, slots map[string]any) string {
 }
 
 // DeviceQuery queries the device list by positions and types.
-func DeviceQuery(positions []string, types []string) string {
+func DeviceQuery(positions []string, types []string, cloudCtx CloudCtx) string {
 	if positions == nil {
 		positions = []string{}
 	}
@@ -112,7 +116,7 @@ func DeviceQuery(positions []string, types []string) string {
 		"positions":    positions,
 		"device_types": types,
 	}
-	result, message := CallService[string]("DeviceQuery", data)
+	result, message := CallService[string]("DeviceQuery", data, cloudCtx)
 	if message != "" {
 		return message
 	}
@@ -123,7 +127,7 @@ func DeviceQuery(positions []string, types []string) string {
 }
 
 // DeviceStatusQuery fetches device status information.
-func DeviceStatusQuery(positions []string, types []string) string {
+func DeviceStatusQuery(positions []string, types []string, cloudCtx CloudCtx) string {
 	if positions == nil {
 		positions = []string{}
 	}
@@ -135,7 +139,7 @@ func DeviceStatusQuery(positions []string, types []string) string {
 		"positions":    positions,
 		"device_types": types,
 	}
-	result, message := CallService[string]("DeviceStatusQuery", data)
+	result, message := CallService[string]("DeviceStatusQuery", data, cloudCtx)
 	if message != "" {
 		return message
 	}
@@ -146,7 +150,7 @@ func DeviceStatusQuery(positions []string, types []string) string {
 }
 
 // GetScenes queries automation scenes for specified positions.
-func GetScenes(positions []string) string {
+func GetScenes(positions []string, cloudCtx CloudCtx) string {
 	if positions == nil {
 		positions = []string{}
 	}
@@ -154,7 +158,7 @@ func GetScenes(positions []string) string {
 	data := map[string]any{
 		"positions": positions,
 	}
-	result, message := CallService[string]("GetScenes", data)
+	result, message := CallService[string]("GetScenes", data, cloudCtx)
 	if message != "" {
 		return message
 	}
@@ -165,7 +169,7 @@ func GetScenes(positions []string) string {
 }
 
 // RunScenes executes the specified scenes.
-func RunScenes(scenes []int) string {
+func RunScenes(scenes []int, cloudCtx CloudCtx) string {
 	if len(scenes) == 0 {
 		return "Scene list cannot be empty"
 	}
@@ -173,7 +177,7 @@ func RunScenes(scenes []int) string {
 	data := map[string]any{
 		"scenes": scenes,
 	}
-	_, message := CallService[any]("RunScenes", data)
+	_, message := CallService[any]("RunScenes", data, cloudCtx)
 	if message != "" {
 		return message
 	}
@@ -181,8 +185,8 @@ func RunScenes(scenes []int) string {
 }
 
 // GetHomes retrieves the list of user homes.
-func GetHomes() ([]string, string) {
-	result, err := CallService[[]string]("GetHomes", nil)
+func GetHomes(cloudCtx CloudCtx) ([]string, string) {
+	result, err := CallService[[]string]("GetHomes", nil, cloudCtx)
 	if err != "" {
 		return nil, err
 	}
@@ -193,7 +197,7 @@ func GetHomes() ([]string, string) {
 }
 
 // SwitchHome switches the current user home.
-func SwitchHome(homeName string) (bool, string) {
+func SwitchHome(homeName string, cloudCtx CloudCtx) (bool, string) {
 	if strings.TrimSpace(homeName) == "" {
 		return false, "Home name cannot be empty"
 	}
@@ -202,7 +206,7 @@ func SwitchHome(homeName string) (bool, string) {
 		HomeName string `json:"home_name"`
 	}{
 		HomeName: strings.TrimSpace(homeName),
-	})
+	}, cloudCtx)
 	if message != "" {
 		return false, message
 	}
@@ -213,7 +217,7 @@ func SwitchHome(homeName string) (bool, string) {
 }
 
 // AutomationConfig configures a scheduled device control task.
-func AutomationConfig(scheduledTime string, endpointIDs []int, controlParams map[string]any, taskName string, executionOnce bool) string {
+func AutomationConfig(scheduledTime string, endpointIDs []int, controlParams map[string]any, taskName string, executionOnce bool, cloudCtx CloudCtx) string {
 	if strings.TrimSpace(scheduledTime) == "" {
 		return "Scheduled time cannot be empty"
 	}
@@ -235,7 +239,7 @@ func AutomationConfig(scheduledTime string, endpointIDs []int, controlParams map
 		"execution_once": executionOnce,
 	}
 
-	_, message := CallService[string]("AutomationConfig", data)
+	_, message := CallService[string]("AutomationConfig", data, cloudCtx)
 	if message != "" {
 		return message
 	}
@@ -243,7 +247,7 @@ func AutomationConfig(scheduledTime string, endpointIDs []int, controlParams map
 }
 
 // DeviceLogQuery queries device historical log information
-func DeviceLogQuery(endpointIDs []int, startDatetime, endDatetime string, attributes []string) string {
+func DeviceLogQuery(endpointIDs []int, startDatetime, endDatetime string, attributes []string, cloudCtx CloudCtx) string {
 	log.Printf("[INFO] [DeviceLogQuery] Querying device logs for endpoints: %v, start: %s, end: %s, attributes: %v",
 		endpointIDs, startDatetime, endDatetime, attributes)
 
@@ -270,7 +274,7 @@ func DeviceLogQuery(endpointIDs []int, startDatetime, endDatetime string, attrib
 		data["attributes"] = attributes
 	}
 
-	result, message := CallService[string]("DeviceLogQuery", data)
+	result, message := CallService[string]("DeviceLogQuery", data, cloudCtx)
 	if message != "" {
 		return message
 	}
@@ -281,11 +285,15 @@ func DeviceLogQuery(endpointIDs []int, startDatetime, endDatetime string, attrib
 }
 
 // CallService calls the specific service with payload and returns parsed result and error message.
-func CallService[T any](serviceName string, data any) (*T, string) {
-	requestURL := MCPCloudAPIBase + "/mcp/call"
+func CallService[T any](serviceName string, data any, cloudCtx CloudCtx) (*T, string) {
+	if cloudCtx.ApiBase == "" || cloudCtx.ApiKey == "" {
+		log.Println("[ERROR] Valid API key and base URL not configured")
+		return nil, "[ERROR] Valid API key and base URL not configured"
+	}
+
+	requestURL := cloudCtx.ApiBase + "/mcp/call"
 	reqData := RequestBody{
-		Token:     Token,
-		Region:    Region,
+		Token:     cloudCtx.ApiKey,
 		Version:   Version,
 		Fn:        serviceName,
 		Params:    data,
@@ -374,7 +382,7 @@ func httpPost[T any](url string, data any, headers map[string]string) (*T, strin
 		return &result.Result, ""
 	}
 
-	log.Printf("[ERROR] Request error: (%d) %v, Details: %s\n", result.Code, err, result.MsgDetails)
+	log.Printf("[WARN] Request error: (%d), Details: %s\n", result.Code, result.MsgDetails)
 	if result.MsgDetails != "" {
 		return nil, result.MsgDetails
 	}
@@ -426,6 +434,9 @@ func httpGet[T any](baseURL string, queryParams map[string]string) (*T, error) {
 
 // calculateSignature computes the signature for the request.
 func calculateSignature(secret, method, path, timestamp, bodyHash string) string {
+	if secret == "" {
+		return ""
+	}
 	payload := strings.Join([]string{method, path, timestamp, bodyHash}, "\n")
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write([]byte(payload))
