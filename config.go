@@ -17,8 +17,8 @@ import (
 
 // Global variables
 var (
-	CloudApiKey               = strings.TrimSpace(os.Getenv("AQARA_API_KEY"))
-	CloudAPIBase              = strings.TrimSpace(os.Getenv("AQARA_BASE_URL")) // http://host:port/echo/
+	CloudApiKey               = strings.TrimSpace(os.Getenv("aqara_api_key"))
+	CloudAPIBase              = strings.TrimSpace(os.Getenv("aqara_base_url")) // http://host:port/echo/mcp
 	DeviceID                  = ""
 	AppID                     = ""
 	AppSecret                 = ""

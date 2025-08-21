@@ -291,7 +291,7 @@ func CallService[T any](serviceName string, data any, cloudCtx CloudCtx) (*T, st
 		return nil, "[ERROR] Valid API key and base URL not configured"
 	}
 
-	requestURL := cloudCtx.ApiBase + "/mcp/call"
+	requestURL := cloudCtx.ApiBase + "/call"
 	reqData := RequestBody{
 		Token:     cloudCtx.ApiKey,
 		Version:   Version,
