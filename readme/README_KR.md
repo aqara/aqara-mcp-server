@@ -19,6 +19,14 @@
 
 **Aqara MCP Server**는 [모델 컨텍스트 프로토콜(MCP)](https://modelcontextprotocol.io/introduction)을 기반으로 구축된 스마트 홈 자동화 제어 서비스입니다. 이 플랫폼은 AI 어시스턴트(예: Claude, Cursor 등)와 Aqara 스마트 홈 생태계 간의 원활한 통합을 구현합니다.
 
+> [!TIP]
+> **추천: Aqara 공식 Agent Skill**
+>
+> 사용 중인 AI 호스트가 Agent Skills를 지원한다면(예: Claude, Cursor, OpenClaw 등), 공식 **Aqara Agent Skills**를 직접 사용하시길 **강력히 권장**합니다. MCP Server를 별도로 배포할 필요 없이, 자연어만으로 집 / 공간, 기기, 장면, 자동화, 에너지 사용량을 조회·제어할 수 있어 즉시 사용할 수 있습니다.
+>
+> - 🔗 GitHub: [aqara/aqara-agent-skills](https://github.com/aqara/aqara-agent-skills)
+> - 🔗 ClawHub: [aqara/aqara-agent](https://clawhub.ai/aqara/aqara-agent)
+
 ## 목차
 
 - [목차](#목차)
