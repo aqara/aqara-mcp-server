@@ -43,7 +43,15 @@ func httpContext(ctx context.Context, r *http.Request) context.Context {
 }
 
 func serverStart(transport string) {
-	hooks := &server.Hooks{}
+	var (
+		hooks     = &server.Hooks{}
+		lifecycle *stdioLifecycle
+	)
+
+	if transport == "stdio" {
+		lifecycle = newStdioLifecycle()
+		hooks = lifecycle.hooks()
+	}
 
 	mcpServer := server.NewMCPServer(
 		"Aqara MCP Server",
@@ -105,10 +113,12 @@ func serverStart(transport string) {
 		if err := sseServer.Start(baseURL); err != nil {
 			log.Fatalf("SSE Server error: %v", err)
 		}
-	default:
+	case "stdio":
 		log.Println("Starting server with stdio transport.")
-		if err := server.ServeStdio(mcpServer); err != nil {
+		if err := lifecycle.serve(mcpServer); err != nil {
 			log.Fatalf("Stdio Server error: %v", err)
 		}
+	default:
+		log.Fatalf("Unknown transport: %q (expected one of: stdio, http, sse)", transport)
 	}
 }

@@ -91,7 +91,7 @@ func init() {
 
 	// Flags specific to SSE server, but defined as persistent for potential broader use or simplification.
 	// Alternatively, they could be local flags for sseCmd.
-	rootCmd.PersistentFlags().String("host", "0.0.0.0", "The host address for the Streamable-HTTP server.")
+	rootCmd.PersistentFlags().String("host", "0.0.0.0", "The host address for the Streamable-HTTP/SSE server.")
 	rootCmd.PersistentFlags().String("port", "8000", "The port for the SSE server.")
 
 	// Bind these flags to viper keys for configuration management.
