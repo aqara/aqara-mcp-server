@@ -47,12 +47,6 @@ config.yml
 ehthumbs.db
 Thumbs.db
 
-# Build output
-build.sh
-/bin/
-/dist/
-build/
-
 # Log files
 *.log
 

@@ -1,98 +1,87 @@
 <div align="center" style="display: flex; align-items: center; justify-content: center; ">
 
-  <img src="/readme/img/logo.png" alt="Aqara Logo" height="120">
+  <img src="img/logo.png" alt="Aqara Logo" height="120">
   <h1>Aqara MCP Server</h1>
 
 </div>
 
 <div align="center">
 
-English | [中文](/readme/README_CN.md) | [繁體中文](/readme/README_CHT.md) | [Français](/readme/README_FR.md) | [한국어](/readme/README_KR.md) | [Español](/readme/README_ES.md) | [日本語](/readme/README_JP.md) | [Deutsch](/readme/README_DE.md) | [Italiano](/readme/README_IT.md)
+English | [中文](README_CN.md) | [Français](README_FR.md) | [한국어](README_KR.md) | [Español](README_ES.md) | [日本語](README_JP.md) | [Deutsch](README_DE.md) | [Italiano](README_IT.md)
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/aqara/aqara-mcp-server)
-[![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org/dl/)
-[![Release](https://img.shields.io/github/v/release/aqara/aqara-mcp-server)](https://github.com/aqara/aqara-mcp-server/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Protocol](https://img.shields.io/badge/MCP-Protocol-00ff00)](https://modelcontextprotocol.io/)
 
 </div>
 
-**Aqara MCP Server** is a smart home automation control service built on the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction). This platform enables seamless integration between AI assistants (like Claude, Cursor, etc.) and the Aqara smart home ecosystem.
+**Aqara MCP Server** is a remote MCP service provided by Aqara Agent. It lets MCP-enabled AI applications securely connect to Aqara smart home capabilities. When you need MCP integration, configure the remote MCP URL provided by Aqara Agent.
 
 > [!TIP]
-> **Recommended: Official Aqara Agent Skill**
+> **Recommended: Official Aqara Agent Skills**
 >
-> If your AI host supports Agent Skills (such as Claude, Cursor, OpenClaw, etc.), we **strongly recommend** using the official **Aqara Agent Skills** directly—no need to deploy your own MCP Server. Query and control homes / spaces, devices, scenes, automations, and energy usage through natural language, right out of the box.
+> If your application supports Agent Skills (such as Codex, Cursor, or OpenClaw), we recommend using the official **Aqara Agent Skills** first. You can query and control homes/spaces, devices, scenes, automations, energy consumption, and more in natural language—without configuring an MCP Server.
 >
-> - 🔗 GitHub: [aqara/aqara-agent-skills](https://github.com/aqara/aqara-agent-skills)
-> - 🔗 ClawHub: [aqara/aqara-agent](https://clawhub.ai/aqara/aqara-agent)
+> - GitHub: [aqara/aqara-agent-skills](https://github.com/aqara/aqara-agent-skills)
+> - ClawHub: [aqara/aqara-agent](https://clawhub.ai/aqara/aqara-agent)
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
+- [Overview](#overview)
 - [Features](#features)
 - [How It Works](#how-it-works)
 - [Quick Start](#quick-start)
   - [Prerequisites](#prerequisites)
   - [Step 1: Account Authentication](#step-1-account-authentication)
-  - [Step 2: How to Use](#step-2-how-to-use)
-    - [Option A: Remote MCP Server (Recommended)](#option-a-remote-mcp-server-recommended)
-    - [Option B: Local MCP Server](#option-b-local-mcp-server)
+  - [Step 2: Configure Remote MCP](#step-2-configure-remote-mcp)
   - [Step 3: Verification](#step-3-verification)
-- [API Reference](#api-reference)
+- [Configuration Notes](#configuration-notes)
+- [MCP Tool Reference](#mcp-tool-reference)
   - [Core Tools Overview](#core-tools-overview)
-  - [Device Control API](#device-control-api)
-    - [`device_control`](#device_control)
-  - [Device Query API](#device-query-api)
-    - [`device_query`](#device_query)
-    - [`device_status_query`](#device_status_query)
-    - [`device_log_query`](#device_log_query)
-  - [Scene Management API](#scene-management-api)
-    - [`get_scenes`](#get_scenes)
-    - [`run_scenes`](#run_scenes)
-  - [Home Management API](#home-management-api)
-    - [`get_homes`](#get_homes)
-    - [`switch_home`](#switch_home)
-  - [Automation Configuration API](#automation-configuration-api)
-    - [`automation_config`](#automation_config)
-- [Project Structure](#project-structure)
-  - [Directory Structure](#directory-structure)
-  - [Core File Descriptions](#core-file-descriptions)
-- [Development \& Contribution](#development--contribution)
-  - [Development Environment Setup](#development-environment-setup)
-  - [Code Quality Standards](#code-quality-standards)
-  - [Contribution Guidelines](#contribution-guidelines)
+  - [Home and Positions](#home-and-positions)
+  - [Device Query and Control](#device-query-and-control)
+  - [Scenes](#scenes)
+  - [Automations](#automations)
+  - [Energy Consumption](#energy-consumption)
+  - [Lighting Effects](#lighting-effects)
+  - [Firmware](#firmware)
+  - [Parameter Conventions](#parameter-conventions)
 - [License](#license)
+
+## Overview
+
+The recommended MCP integration today centers on Aqara Agent:
+
+- **Remote MCP**: For applications that support Streamable HTTP / HTTP MCP via `https://agent.aqara.com/open/mcp`.
+- **Aqara Agent Skills**: For applications with Agent Skills—install skills without manually configuring an MCP Server.
+- **MCP Tool capabilities**: Cover smart home operations across homes/spaces, devices, scenes, automations, energy consumption, lighting effects, and firmware.
 
 ## Features
 
-- ✨ **Comprehensive Device Control**: Fine-grained control over various attributes of Aqara smart devices, including on/off, brightness, color temperature, and modes.
-- 🔍 **Flexible Device Query**: Ability to query device lists and their detailed statuses by room or device type.
-- 🎬 **Smart Scene Management**: Supports querying and executing user-predefined smart home scenes.
-- 📈 **Device History**: Query the historical status change records of devices within a specified time range.
-- ⏰ **Automation Configuration**: Supports configuring scheduled or delayed device control tasks.
-- 🏠 **Multi-Home Support**: Supports querying and switching between different homes under a user's account.
-- 🔌 **MCP Protocol Compatibility**: Fully compliant with the MCP specification, allowing for easy integration with various AI assistants.
-- 🔐 **Secure Authentication**: Utilizes a login authorization + signature-based security mechanism to protect user data and device security.
-- 🌐 **Cross-Platform**: Developed in Go, can be compiled into executables for multiple platforms.
-- 🔧 **Easily Extensible**: Modular design allows for the convenient addition of new tools and features.
+- 🔍 **Flexible device queries**: Query device basics, real-time status, and control logs by home/space, device type, or device ID.
+- ✨ **Comprehensive device control**: Control power, brightness, color temperature, temperature, fan speed, mode, curtain percentage, and more on Aqara devices.
+- 🎬 **Smart scene management**: Query and run scenes, and review scene execution history.
+- ⏰ **Automation queries**: Query automation rules and their execution history.
+- 📈 **Energy statistics**: Query electricity usage and cost by room/space or device, with aggregated and detailed views.
+- 💡 **Lighting effect management**: Query lighting scenarios/effects, apply specified effects, and query effect configuration parameters.
+- 🔄 **Firmware management**: Query current and available firmware versions, and start device firmware upgrades.
+- 🏠 **Multiple homes and spaces**: List homes on your Aqara account and rooms/spaces in the current home.
+- 🔌 **Remote MCP integration**: Connect via HTTP MCP URL for apps such as Cursor and Codex.
+- 🔐 **Secure authentication**: Obtain `aqara_api_key` after signing in to Aqara Agent—keep credentials safe when configuring.
 
 ## How It Works
 
-Aqara MCP Server acts as a bridge between AI assistants and the Aqara smart home platform:
+In remote MCP mode, the application connects over HTTP to Aqara Agent’s MCP service and includes the Bearer token generated on the login page. Aqara Agent validates credentials, executes Tool calls, and returns results to the application:
 
 ```mermaid
 graph LR
-    A[AI Assistant - MCP Host] --> B[MCP Client]
-    B --> C[Aqara MCP Server]
-    C --> D[Aqara Cloud API]
-    D --> E[AIOT Devices]
+    A[AI App / MCP Host] --> B[Aqara Agent]
+    B --> C[Aqara Cloud API]
+    C --> D[Aqara Devices / Scenes / Automations]
 ```
 
-1.  **AI Assistant**: The user issues a command through an AI assistant (e.g., "Turn on the living room light").
-2.  **MCP Client**: Parses the user's command and calls the corresponding tool provided by the Aqara MCP Server (e.g., `device_control`) according to the MCP protocol.
-3.  **Aqara MCP Server (This Project)**: Receives the request from the client, communicates with the Aqara Cloud API using the configured Aqara credentials, and executes the actual device operation or data query.
-4.  **Response Flow**: The Aqara Cloud API returns the result, which is passed back to the MCP client via the Aqara MCP Server and finally presented to the user.
+1. **AI App / MCP Host**: The user sends natural-language instructions from Cursor, Codex, and similar apps.
+2. **Aqara Agent**: Validates user credentials, interprets, and runs the corresponding Tools.
+3. **Aqara Cloud API**: Performs data queries or control actions for devices, scenes, automations, energy consumption, lighting effects, firmware, and more.
 
 ---
 
@@ -100,348 +89,367 @@ graph LR
 
 ### Prerequisites
 
--   **Aqara Account** with registered smart devices.
--   **MCP-enabled Client** (e.g., Claude for Desktop, Cursor).
--   **Go 1.24+** (only required for local deployment from source).
+- An **Aqara account** with registered smart devices.
+- An **application that supports remote MCP**, such as Cursor or Codex.
+- **Aqara Agent credentials**: `aqara_api_key` and `aqara_mcp_url` from the login page.
 
 ### Step 1: Account Authentication
 
-Regardless of the deployment mode, you first need to obtain Aqara authentication credentials:
+1. **Open the login page**:
+   [https://agent.aqara.com/login](https://agent.aqara.com/login)
 
-1.  **Visit the Login Page**:
-    🔗 [https://cdn.aqara.com/app/mcpserver/login.html](https://cdn.aqara.com/app/mcpserver/login.html)
+2. **Complete sign-in**:
+   - Sign in with your Aqara account.
+   - After sign-in, copy the `aqara_api_key` shown on the page.
+   - For MCP configuration, use the `aqara_mcp_url` on the page—typically `https://agent.aqara.com/open/mcp`.
 
-2.  **Complete the Login Process**:
-    -   Log in with your Aqara credentials.
-    -   Obtain the `api_key` and `base_url`.
+3. **Store credentials securely**:
 
-3.  **Store Credentials Securely**:
-    > ⚠️ Please keep your `api_key` information safe and do not disclose it to others.
+   > Keep your `aqara_api_key` safe. Do not commit it to a repository, publish it in screenshots, or share it with others.
 
-    ![Configuration Example](/readme/img/config_info.png)
+   ![Configuration information after Aqara Agent sign-in](img/config_info.png)
 
-### Step 2: How to Use
+### Step 2: Configure Remote MCP
 
-Choose the deployment method that suits your needs:
+#### Cursor
 
-#### Option A: Remote MCP Server (Recommended)
+1. Open Cursor Settings, go to `Tools & MCPs`, and click `New MCP Server`.
 
-**Suitable for**: Users who want to get started quickly without local environment setup.
+   ![Cursor MCP settings entry](img/cursor_opening_setting.png)
 
-**Advantages**:
+2. Add the remote MCP configuration. Use the `aqara_mcp_url` from the login page; if entering manually, use the `/open/mcp` path.
 
--   ✅ **Ready to Use**: No need to download or compile; configure and use directly.
--   ✅ **Automatic Updates**: The server is automatically maintained and updated.
--   ✅ **High Availability**: Professional operations ensure service stability.
--   ✅ **Multi-Platform Compatibility**: No operating system restrictions.
+   ```json
+   {
+     "mcpServers": {
+       "aqara": {
+         "type": "http",
+         "url": "https://agent.aqara.com/open/mcp",
+         "headers": {
+           "Authorization": "Bearer <YOUR_AQARA_API_KEY>"
+         }
+       }
+     }
+   }
+   ```
 
-**Configure MCP Client**:
+3. Save the configuration and restart Cursor for MCP settings to take effect.
 
-1.  **Open Settings**:
-    -   Launch Cursor.
+#### Codex
 
-    ![Open Setting](/readme/img/cursor_opening_setting.png)
+1. In Codex settings, add a custom MCP Server.
+2. Select type `Streamable HTTP`.
+3. Enter the `aqara_mcp_url` from the login page, e.g. `https://agent.aqara.com/open/mcp`.
+4. For the Bearer token, enter the value of `aqara_api_key`.
 
-2.  **Add Server Configuration**:
-
-    ```json
-    {
-      "mcpServers": {
-        "aqara": {
-          "type": "http",
-          "url": "https://[mcp-server-domain]/echo/mcp",  // base_url
-          "headers": {
-            "Authorization": "Bearer [YOUR_API_KEY_HERE]"  // api_key
-          }
-        }
-      }
-    }
-    ```
-
-3.  **Restart the Application**:
-    -   Restart Cursor for the changes to take effect.
-
-#### Option B: Local MCP Server
-
-**Suitable for**: Users who require data sovereignty, custom configurations, or offline use.
-
-**Advantages**:
-
--   ✅ **Data Privacy**: All data is processed locally.
--   ✅ **Full Control**: Customizable configuration and extensible features.
--   ✅ **Offline Availability**: Basic functions are not affected by network interruptions.
--   ✅ **No Restrictions**: Not limited by cloud services.
-
-**Installation Steps**:
-
-1.  **Download the Program** (choose one):
-
-    **Recommended: Download Pre-compiled Version**
-
-    Visit [GitHub Releases](https://github.com/aqara/aqara-mcp-server/releases) to download the latest version for your operating system.
-
-    **Alternatively: Build from Source**
-
-    ```bash
-    git clone https://github.com/aqara/aqara-mcp-server.git
-    cd aqara-mcp-server
-    go mod tidy
-    go build -ldflags="-s -w" -o aqara-mcp-server
-    ```
-
-2.  **Set Environment Variables**:
-
-    ```bash
-    export aqara_api_key="your_api_key_here"
-    export aqara_base_url="your_base_url_here"
-    ```
-
-**Configure MCP Client (e.g., **Claude for Desktop**)**:
-
-1.  **Open Settings**:
-    -   Launch Claude for Desktop.
-    -   Navigate to: Settings → Developer.
-
-    ![Claude Open Setting](/readme/img/claude_opening_setting.png)
-
-2.  **Edit Configuration File**:
-    -   Click "Edit Configuration".
-
-    ![Claude Edit Configuration](/readme/img/claude_edit_config.png)
-
-3.  **Add Server Configuration (claude_desktop_config.json)**:
-
-    ```json
-    {
-      "mcpServers": {
-        "aqara": {
-          "command": "/path/to/aqara-mcp-server",
-          "args": ["run", "stdio"],
-          "env": {
-            "aqara_api_key": "your_api_key_here",
-            "aqara_base_url": "your_base_url_here"
-          }
-        }
-      }
-    }
-    ```
-
-4.  **Restart the Application**:
-    -   Restart Claude for Desktop for the changes to take effect.
+![Codex custom MCP settings](img/codex_opening_setting.png)
 
 ### Step 3: Verification
 
-Use the following test commands to verify that the configuration is successful:
+After configuration succeeds, you can test with natural-language requests such as:
 
+```text
+User: Show all devices in my home
+Assistant: Query the device list via MCP
+
+User: Turn on the living room light
+Assistant: Run device control via MCP
+
+User: Run the movie night scene
+Assistant: Run the scene via MCP
 ```
-User: "Show all devices in my home"
-Assistant: [Queries device list via MCP]
 
-User: "Turn on the living room light"
-Assistant: [Executes device control via MCP]
-
-User: "Run the evening scene"
-Assistant: [Executes scene via MCP]
-```
-
-If you see a message like "🔧 Connected to Aqara MCP Server," the configuration is successful!
+If the app’s MCP panel shows Aqara as connected and Aqara Tools are visible, the configuration is active.
 
 ---
 
-## API Reference
+## Configuration Notes
+
+- Use `https://agent.aqara.com/open/mcp` or the `aqara_mcp_url` from the login page as the MCP URL—do not use the login page URL as the MCP URL.
+- Tools for device control, scene execution, and firmware upgrades affect real home devices. On first use, run query Tools first to confirm home, space, device, and scene information.
+- If connection fails, check: MCP type is HTTP / Streamable HTTP, URL includes `/open/mcp`, credentials are not expired, and the app was restarted or MCP reloaded after configuration changes.
+
+---
+
+## MCP Tool Reference
+
+The Tool list below is based on function definitions registered on the current Aqara Agent service. Applications may display different Tool names in the UI, but parameter semantics and capability scope stay the same.
 
 ### Core Tools Overview
 
-| Tool Category        | Tool                                                 | Description                          |
-| -------------------- | ---------------------------------------------------- | ------------------------------------ |
-| **Device Control**   | `device_control`                                     | Direct device operations             |
-| **Device Query**     | `device_query`, `device_status_query`, `device_log_query` | Comprehensive device information     |
-| **Scene Management** | `get_scenes`, `run_scenes`                           | Automated scene control              |
-| **Home Management**  | `get_homes`, `switch_home`                           | Multi-home environment support       |
-| **Automation**       | `automation_config`                                  | Scheduled task configuration         |
+| Tool Category | Tool | Description |
+| --- | --- | --- |
+| **Home and Positions** | `all_homes_inquiry`, `position_base_inquiry` | Query home and room/space information |
+| **Device Query and Control** | `device_base_inquiry`, `device_status_inquiry`, `device_status_control`, `fuzzy_device_batch_control`, `device_log_inquiry` | Query device basics and real-time status, control devices, and view control logs |
+| **Scenes** | `scene_base_inquiry`, `scene_run`, `scene_execution_history_inquiry` | Query and run scenes, and query scene execution history |
+| **Automations** | `automation_base_inquiry`, `automation_execution_history_inquiry` | Query automation rules and execution history |
+| **Energy Consumption** | `energy_consumption_inquiry_for_position`, `energy_consumption_inquiry_for_device` | Query electricity usage/cost by room/space or device |
+| **Lighting Effects** | `lighting_effect_inquiry`, `device_lighting_effect_inquiry`, `lighting_effect_control`, `lighting_effect_config_params_inquiry` | Query and apply lighting effects, and query effect configuration parameters |
+| **Firmware** | `device_firmware_inquiry`, `device_firmware_upgrade` | Query and upgrade device firmware |
 
-### Device Control API
+### Home and Positions
 
-#### `device_control`
+#### `all_homes_inquiry`
 
-Controls the state or attributes of smart home devices (e.g., on/off, temperature, brightness, color, color temperature).
+Query all homes under the current Aqara account.
 
-**Parameters:**
+**Parameters:** none
 
--   `endpoint_ids` _(Array\<Integer\>, required)_: A list of device IDs to be controlled.
--   `control_params` _(Object, required)_: A control parameter object containing specific actions:
-    -   `action` _(String, required)_: The action to perform (e.g., `"on"`, `"off"`, `"set"`, `"up"`, `"down"`, `"cooler"`, `"warmer"`).
-    -   `attribute` _(String, required)_: The device attribute to control (e.g., `"on_off"`, `"brightness"`, `"color_temperature"`, `"ac_mode"`).
-    -   `value` _(String | Number, optional)_: The target value (required when `action` is "set").
-    -   `unit` _(String, optional)_: The unit of the value (e.g., `"%"`, `"K"`, `"℃"`).
+**Returns:** A list of homes with home name, home ID, and related fields.
 
-**Returns:** A message indicating the result of the device control operation.
+#### `position_base_inquiry`
 
-### Device Query API
+Query basic information for all rooms/spaces in the current home.
 
-#### `device_query`
+**Parameters:** none
 
-Retrieves a comprehensive list of devices based on specified locations (rooms) and device types, with support for filtering (does not include real-time status information).
+**Returns:** A list of rooms/spaces with position name, position ID, and related fields.
 
-**Parameters:**
+### Device Query and Control
 
--   `positions` _(Array\<String\>, optional)_: A list of room names. An empty array queries all rooms.
--   `device_types` _(Array\<String\>, optional)_: A list of device types (e.g., `"Light"`, `"WindowCovering"`, `"AirConditioner"`, `"Button"`). An empty array queries all types.
+#### `device_base_inquiry`
 
-**Returns:** A Markdown-formatted list of devices, including device names and IDs.
-
-#### `device_status_query`
-
-Gets the current status information of devices (used to query real-time status like color, brightness, on/off).
+Query device basic information by room/space and device type, without real-time status.
 
 **Parameters:**
 
--   `positions` _(Array\<String\>, optional)_: A list of room names. An empty array queries all rooms.
--   `device_types` _(Array\<String\>, optional)_: A list of device types. Same options as `device_query`. An empty array queries all types.
+- `position_ids` _(Array\<String\>, optional)_: List of room/space IDs. When empty, no position filter is applied.
+- `device_types` _(Array\<String\>, optional)_: Device types, e.g. `Light`, `Switch`, `Outlet`, `AirConditioner`, `WindowCovering`, `Camera`. When empty, no device type filter is applied.
 
-**Returns:** Markdown-formatted device status information.
+**Returns:** A list of device basics including device name, device ID, position, and device type.
 
-#### `device_log_query`
+#### `device_status_inquiry`
 
-Queries the historical log information of devices.
-
-**Parameters:**
-
--   `endpoint_ids` _(Array\<Integer\>, required)_: A list of device IDs for which to query history.
--   `start_datetime` _(String, optional)_: The query start time in `YYYY-MM-DD HH:MM:SS` format (e.g., `"2023-05-16 12:00:00"`).
--   `end_datetime` _(String, optional)_: The query end time in `YYYY-MM-DD HH:MM:SS` format.
--   `attributes` _(Array\<String\>, optional)_: A list of device attribute names to query (e.g., `["on_off", "brightness"]`). If not provided, all logged attributes are queried.
-
-**Returns:** Markdown-formatted historical device status information.
-
-### Scene Management API
-
-#### `get_scenes`
-
-Queries all scenes in a user's home or scenes in specified rooms.
+Query real-time device status such as power, brightness, color temperature, temperature, fan speed, and mode.
 
 **Parameters:**
 
--   `positions` _(Array\<String\>, optional)_: A list of room names. An empty array queries scenes for the entire home.
+- `device_ids` _(Array\<String\>, optional)_: Device IDs. When provided, query prioritizes device ID.
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs.
+- `device_types` _(Array\<String\>, optional)_: Device types.
 
-**Returns:** Markdown-formatted scene information.
+**Returns:** A list of device states with current readable values.
 
-#### `run_scenes`
+#### `device_status_control`
 
-Executes specified scenes by their scene IDs.
-
-**Parameters:**
-
--   `scenes` _(Array\<Integer\>, required)_: A list of scene IDs to be executed.
-
-**Returns:** A message indicating the result of the scene execution.
-
-### Home Management API
-
-#### `get_homes`
-
-Gets a list of all homes under the user's account.
-
-**Parameters:** None
-
-**Returns:** A comma-separated list of home names. Returns an empty string or a corresponding message if no data is available.
-
-#### `switch_home`
-
-Switches the user's currently active home. After switching, subsequent device queries, controls, etc., will target the newly switched home.
+Control state or attributes of specified devices, such as power, brightness, color temperature, temperature, fan speed, mode, and curtain percentage.
 
 **Parameters:**
 
--   `home_name` _(String, required)_: The name of the target home.
+- `device_ids` _(Array\<String\>, required)_: Target device IDs.
+- `attribute` _(String, required)_: Attribute to control, e.g. `on_off`, `brightness`, `color_temperature`, `temperature`, `percentage`, `mode`.
+- `action` _(String, required)_: Control action, e.g. `on`, `off`, `set`, `up`, `down`, `warmer`, `cooler`, `start`, `stop`.
+- `value` _(String, optional)_: Target value, e.g. `50`, `max`, `min`, `cool`, `heat`, `red`.
 
-**Returns:** A message indicating the result of the switch operation.
+**Returns:** Device control execution result.
 
-### Automation Configuration API
+#### `fuzzy_device_batch_control`
 
-#### `automation_config`
-
-Configures automation (currently only supports scheduled or delayed device control tasks).
+Batch-control devices by room/space and device type—for example, “turn off all lights,” “turn off everything in the living room,” or “set all AC units to 26°.”
 
 **Parameters:**
 
--   `scheduled_time` _(String, required)_: The scheduled execution time in standard Crontab format `"min hour day month week"`. E.g., `"30 14 * * *"` (execute at 14:30 every day), `"0 9 * * 1"` (execute at 9:00 every Monday).
--   `endpoint_ids` _(Array\<Integer\>, required)_: A list of device IDs to be controlled on a schedule.
--   `control_params` _(Object, required)_: Device control parameters, in the same format as the `device_control` tool (including action, attribute, value, etc.).
--   `task_name` _(String, required)_: The name or description of this automation task (for identification and management).
--   `execution_once` _(Boolean, optional)_: Whether to execute only once.
-    -   `true`: Executes the task only once at the specified time (default).
-    -   `false`: Executes the task periodically (e.g., daily, weekly).
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs. When empty, may mean the entire home.
+- `device_types` _(Array\<String\>, optional)_: Device types.
+- `attribute` _(String, required)_: Attribute to control.
+- `action` _(String, required)_: Control action.
+- `value` _(String, optional)_: Target value.
 
-**Returns:** A message indicating the result of the automation configuration.
+**Returns:** Batch control execution result.
 
-## Project Structure
+#### `device_log_inquiry`
 
-### Directory Structure
+Query device control logs within a time range, including control time, content, and result.
 
-```text
-.
-├── cmd.go                # Cobra CLI command definitions and program entry point (contains main function)
-├── server.go             # Core MCP server logic, tool definitions, and request handling
-├── smh.go                # Aqara smart home platform API interface wrapper
-├── middleware.go         # Middleware: user authentication, timeout control, panic recovery
-├── config.go             # Global configuration management and environment variable handling
-├── go.mod                # Go module dependency management file
-├── go.sum                # Go module dependency checksum file
-├── readme/               # README documents and image resources
-│   ├── img/              # Image resource directory
-│   └── *.md              # Multi-language README files
-├── LICENSE               # MIT open source license
-└── README.md             # Main project document
-```
+**Parameters:**
 
-### Core File Descriptions
+- `time_range` _(Array\<String\>, optional)_: Time interval, e.g. `["2026-01-01 00:00:00", "2026-01-01 23:59:59"]`.
+- `device_ids` _(Array\<String\>, optional)_: Device IDs. When provided, query prioritizes device ID.
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs.
+- `device_types` _(Array\<String\>, optional)_: Device types.
 
--   **`cmd.go`**: CLI implementation based on the Cobra framework, defining `run stdio` and `run http` start modes and the main entry function.
--   **`server.go`**: Core MCP server implementation, responsible for tool registration, request handling, and protocol support.
--   **`smh.go`**: Aqara smart home platform API wrapper layer, providing device control, authentication, and multi-home support.
--   **`middleware.go`**: Request handling middleware, providing authentication validation, timeout control, and exception handling.
--   **`config.go`**: Global configuration management, responsible for handling environment variables and API configuration.
+**Returns:** Control log list and the actual queried time range.
 
-## Development & Contribution
+### Scenes
 
-### Development Environment Setup
+#### `scene_base_inquiry`
 
-```bash
-# Clone the repository
-git clone https://github.com/aqara/aqara-mcp-server.git
-cd aqara-mcp-server
+Query scene basic information, filterable by scene ID, position ID, or device ID.
 
-# Install dependencies
-go mod tidy
+**Parameters:**
 
-# Run tests
-go test ./...
+- `scene_ids` _(Array\<String\>, optional)_: Scene IDs. When provided, query prioritizes scene ID.
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs.
+- `device_ids` _(Array\<String\>, optional)_: Device IDs for device-related scenes.
 
-# Optimized build
-go build -ldflags="-s -w" -o aqara-mcp-server
-```
+**Returns:** A list of scene basic information.
 
-### Code Quality Standards
+#### `scene_run`
 
--   **Go Language**: Follows official Go coding standards.
--   **Documentation**: Comprehensive API documentation.
--   **Testing**: Minimum 80% code coverage.
--   **Security**: Regular security audits.
+Run one or more specified scenes.
 
-### Contribution Guidelines
+**Parameters:**
 
-1.  **Fork the repository**
-2.  **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3.  **Commit your changes**: `git commit -m 'Add some amazing feature'`
-4.  **Push to the branch**: `git push origin feature/amazing-feature`
-5.  **Open a Pull Request**
+- `scene_ids` _(Array\<String\>, required)_: Scene IDs to run.
 
----
+**Returns:** Scene execution result.
+
+#### `scene_execution_history_inquiry`
+
+Query scene execution history within a time range.
+
+**Parameters:**
+
+- `time_range` _(Array\<String\>, optional)_: Time interval.
+- `scene_ids` _(Array\<String\>, optional)_: Scene IDs.
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs.
+- `device_ids` _(Array\<String\>, optional)_: Device IDs.
+
+**Returns:** Scene execution history and the actual queried time range.
+
+### Automations
+
+#### `automation_base_inquiry`
+
+Query automation rule basics, filterable by automation ID, position ID, or device ID.
+
+**Parameters:**
+
+- `automation_ids` _(Array\<String\>, optional)_: Automation IDs. When provided, query prioritizes automation ID.
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs.
+- `device_ids` _(Array\<String\>, optional)_: Device IDs for device-related automations.
+
+**Returns:** A list of automation rules.
+
+#### `automation_execution_history_inquiry`
+
+Query automation execution history within a time range.
+
+**Parameters:**
+
+- `time_range` _(Array\<String\>, optional)_: Time interval.
+- `automation_ids` _(Array\<String\>, optional)_: Automation IDs.
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs.
+- `device_ids` _(Array\<String\>, optional)_: Device IDs.
+
+**Returns:** Automation execution history and the actual queried time range.
+
+### Energy Consumption
+
+#### `energy_consumption_inquiry_for_position`
+
+Query electricity usage or cost by home/room/space, with aggregated and detailed views.
+
+**Parameters:**
+
+- `data_type` _(String, required)_: Query type—`1` for electricity usage, `2` for electricity cost, `3` for both.
+- `time_range` _(Array\<String\>, required)_: Time interval.
+- `time_gradient` _(String, optional)_: Granularity: `30min`, `1hour`, `1day`, `1week`, `1month`.
+- `data_aggregation_mode` _(String, optional)_: `total` = aggregated summary, `detail` = detail view.
+- `positions` _(Array\<String\>, optional)_: Room/space IDs. When empty, queries all valid rooms.
+
+**Returns:** Electricity usage/cost statistics by room/space.
+
+#### `energy_consumption_inquiry_for_device`
+
+Query electricity usage or cost by device, filterable by position or device, with aggregated and detailed views.
+
+**Parameters:**
+
+- `data_type` _(String, required)_: `1` = electricity usage, `2` = electricity cost, `3` = both.
+- `time_range` _(Array\<String\>, required)_: Time interval.
+- `time_gradient` _(String, optional)_: `30min`, `1hour`, `1day`, `1week`, `1month`.
+- `data_aggregation_mode` _(String, optional)_: `total` = aggregated summary, `detail` = detail view.
+- `positions` _(Array\<String\>, optional)_: Room/space IDs.
+- `device_ids` _(Array\<String\>, optional)_: Device IDs. When provided, query prioritizes device.
+
+**Returns:** Electricity usage/cost statistics by device.
+
+### Lighting Effects
+
+#### `lighting_effect_inquiry`
+
+Query available lighting scenarios/effects in the home.
+
+**Parameters:** none
+
+**Returns:** A list of effects with names and applicable scope for control.
+
+#### `device_lighting_effect_inquiry`
+
+Query supported lighting effect names per device.
+
+**Parameters:**
+
+- `device_ids` _(Array\<String\>, required)_: Device IDs to query for effects.
+
+**Returns:** Device-to-effect name mapping list.
+
+#### `lighting_effect_control`
+
+Apply the specified lighting effect to target devices or rooms/spaces.
+
+**Parameters:**
+
+- `effect_name` _(String, required)_: Effect name.
+- `device_ids` _(Array\<String\>, optional)_: Target device IDs. When provided, control prioritizes device.
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs.
+
+**Returns:** Lighting effect control execution result.
+
+#### `lighting_effect_config_params_inquiry`
+
+Query parameters required to configure lighting effects on light devices.
+
+**Parameters:**
+
+- `device_ids` _(Array\<String\>, required)_: Target light device IDs.
+
+**Returns:** Effect configuration parameters, including configurable items, value ranges, and saved user effects.
+
+### Firmware
+
+#### `device_firmware_inquiry`
+
+Batch-query current firmware version and available upgrade version for devices.
+
+**Parameters:**
+
+- `device_ids` _(Array\<String\>, optional)_: Device IDs. When provided, query prioritizes device.
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs.
+- `device_types` _(Array\<String\>, optional)_: Device types.
+
+**Returns:** Firmware information including device name, online status, current version, and available version.
+
+#### `device_firmware_upgrade`
+
+Start firmware upgrades for eligible devices after filtering by device, position, or type.
+
+**Parameters:**
+
+- `device_ids` _(Array\<String\>, optional)_: Device IDs. When provided, upgrades those devices first.
+- `position_ids` _(Array\<String\>, optional)_: Room/space IDs.
+- `device_types` _(Array\<String\>, optional)_: Device types.
+
+**Returns:** Firmware upgrade submission result.
+
+### Parameter Conventions
+
+- `position_ids` / `positions`: Room/space ID lists; when omitted, query or control scope follows each Tool’s description.
+- `device_ids`: Device ID or device endpoint ID lists, resolved via client-side identification and server mapping.
+- `device_types`: Device types, e.g. `Light`, `Switch`, `Outlet`, `AirConditioner`, `WindowCovering`, `Camera`, `TemperatureSensor`.
+- `attribute`: Control attributes, e.g. `on_off`, `brightness`, `color_temperature`, `temperature`, `wind_speed`, `mode`, `percentage`, `volume`, `color`.
+- `action`: Control actions, e.g. `on`, `off`, `set`, `up`, `down`, `warmer`, `cooler`, `start`, `stop`, `pause`, `resume`.
+- `value`: Target values, e.g. `50`, `100`, `max`, `min`, `red`, `cool`, `heat`, lighting effect names.
+- `time_range`: Time interval array, usually `["YYYY-MM-DD HH:MM:SS", "YYYY-MM-DD HH:MM:SS"]`.
+- `data_type`: Energy query type—`1` = electricity usage, `2` = electricity cost, `3` = both.
+- `time_gradient`: Energy statistics granularity: `30min`, `1hour`, `1day`, `1week`, `1month`.
+- `data_aggregation_mode`: Energy aggregation mode—`total` = aggregated summary, `detail` = detail view.
 
 ## License
 
-This project is licensed under the [MIT License](/LICENSE) - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE). See the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Copyright © 2025 Aqara-Copilot. All rights reserved.**
+Copyright © 2025 Aqara-Agent. All rights reserved.
