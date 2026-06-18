@@ -19,7 +19,7 @@
 > [!TIP]
 > **Empfohlen: Offizielle Aqara Agent Skills**
 >
-> Wenn Ihre Anwendung Agent Skills unterstützt (z. B. Codex, Cursor, OpenClaw), empfehlen wir die offiziellen **Aqara Agent Skills**. Ohne manuelle MCP-Server-Konfiguration können Sie per natürlicher Sprache Homes/Räume/Bereiche, Geräte, Szenen, Automationen, Energieverbrauch usw. abfragen und steuern.
+> Wenn Ihre Anwendung Agent Skills unterstützt (z. B. Codex App, Cursor, OpenClaw), empfehlen wir die offiziellen **Aqara Agent Skills**. Ohne manuelle MCP-Server-Konfiguration können Sie per natürlicher Sprache Homes/Räume/Bereiche, Geräte, Szenen, Automationen, Energieverbrauch usw. abfragen und steuern.
 >
 > - GitHub: [aqara/aqara-agent-skills](https://github.com/aqara/aqara-agent-skills)
 > - ClawHub: [aqara/aqara-agent](https://clawhub.ai/aqara/aqara-agent)
@@ -51,7 +51,7 @@
 
 Die aktuell empfohlene MCP-Anbindung basiert auf Aqara Agent:
 
-- **Remote MCP**: Für Anwendungen mit Streamable HTTP / HTTP MCP über `https://agent.aqara.com/open/mcp`.
+- **Remote MCP**: Für Anwendungen mit Streamable HTTP über `https://agent.aqara.com/open/mcp`.
 - **Aqara Agent Skills**: Für Anwendungen mit Agent Skills – Skills installieren, ohne MCP-Server manuell zu konfigurieren.
 - **MCP-Tool-Funktionen**: Abdeckung von Home/Raum/Bereich, Geräten, Szenen, Automationen, Energieverbrauch, Lichtszenarien und Lichteffekten sowie Firmware.
 
@@ -65,7 +65,7 @@ Die aktuell empfohlene MCP-Anbindung basiert auf Aqara Agent:
 - 💡 **Lichtszenarien und Lichteffektverwaltung**: Abfrage von Lichtszenarien/-effekten, Setzen bestimmter Effekte und Abfrage der Konfigurationsparameter.
 - 🔄 **Firmwareverwaltung**: Abfrage der aktuellen und verfügbaren Firmware-Version sowie Start von Firmware-Updates.
 - 🏠 **Mehrere Homes und Räume/Bereiche**: Abfrage der Homes im Aqara-Konto und der Räume/Bereiche im aktuellen Home.
-- 🔌 **Remote-MCP-Anbindung**: Anbindung über HTTP-MCP-URL, z. B. für Cursor und Codex.
+- 🔌 **Remote-MCP-Anbindung**: Anbindung über eine MCP-URL, z. B. für Cursor und Codex App.
 - 🔐 **Sichere Authentifizierung**: `aqara_api_key` nach Anmeldung bei Aqara Agent – Zugangsdaten bei der Konfiguration sicher aufbewahren.
 
 ## Funktionsweise
@@ -74,12 +74,12 @@ Im Remote-MCP-Modus verbindet sich die Anwendung per HTTP mit dem MCP-Dienst von
 
 ```mermaid
 graph LR
-    A[KI-App / MCP Host] --> B[Aqara Agent]
+    A[KI-App / MCP host] --> B[Aqara Agent]
     B --> C[Aqara Cloud API]
     C --> D[Aqara Geräte / Szenen / Automationen]
 ```
 
-1. **KI-App / MCP Host**: Der Nutzer gibt Befehle in natürlicher Sprache in Cursor, Codex usw. ein.
+1. **KI-App / MCP host**: Der Nutzer gibt Befehle in natürlicher Sprache in Cursor, Codex App usw. ein.
 2. **Aqara Agent**: Prüft die Anmeldedaten und interpretiert sowie führt die entsprechenden Tools aus.
 3. **Aqara Cloud API**: Führt Datenabfragen oder Steuerungen für Geräte, Szenen, Automationen, Energieverbrauch, Lichtszenarien und Lichteffekte, Firmware usw. aus.
 
@@ -90,7 +90,7 @@ graph LR
 ### Voraussetzungen
 
 - **Aqara-Konto** mit registrierten Smart-Geräten.
-- **Anwendung mit Remote-MCP-Unterstützung**, z. B. Cursor oder Codex.
+- **Anwendung mit Remote-MCP-Unterstützung**, z. B. Cursor oder Codex App.
 - **Aqara-Agent-Anmeldedaten**: `aqara_api_key` und `aqara_mcp_url` über die Anmeldeseite.
 
 ### Schritt 1: Kontoauthentifizierung
@@ -135,14 +135,20 @@ graph LR
 
 3. Konfiguration speichern und Cursor neu starten, damit die MCP-Konfiguration wirksam wird.
 
-#### Codex
+#### Codex App
 
-1. In den Codex-Einstellungen einen benutzerdefinierten MCP Server hinzufügen.
-2. Typ `Streamable HTTP` wählen.
-3. URL: `aqara_mcp_url` von der Anmeldeseite, z. B. `https://agent.aqara.com/open/mcp`.
-4. Bearer-Token: Wert von `aqara_api_key`.
+1. Speichern Sie zunächst den auf der Anmeldeseite angezeigten `aqara_api_key` in einer Umgebungsvariable. Fügen Sie unter macOS mit zsh Folgendes zu `~/.zshrc` hinzu:
 
-![Benutzerdefinierte MCP-Einstellungen in Codex](img/codex_opening_setting.png)
+   ```bash
+   export AQARA_API_KEY="<YOUR_AQARA_API_KEY>"
+   ```
+
+2. Starten Sie Codex App neu und verbinden Sie sich dann in den Einstellungen mit einem benutzerdefinierten MCP.
+3. Wählen Sie `Streamable HTTP`.
+4. Geben Sie die `aqara_mcp_url` von der Anmeldeseite ein, z. B. `https://agent.aqara.com/open/mcp`.
+5. Geben Sie unter `Bearer-Token-Umgebungsvariable` den Namen der Umgebungsvariable `AQARA_API_KEY` ein, nicht den eigentlichen API-Schlüssel. Codex App liest das Token aus dieser Variable.
+
+![Benutzerdefinierte MCP-Einstellungen in Codex App](img/codex_opening_setting.png)
 
 ### Schritt 3: Überprüfung
 
@@ -167,7 +173,7 @@ Wenn im MCP-Panel der Anwendung Aqara als verbunden angezeigt wird und Aqara Too
 
 - MCP-URL: `https://agent.aqara.com/open/mcp` oder `aqara_mcp_url` von der Anmeldeseite – nicht die Anmeldeseiten-URL als MCP-URL verwenden.
 - Tools für Gerätesteuerung, Szenenausführung, Firmware-Updates usw. wirken auf echte Geräte im Home. Beim ersten Einsatz zuerst Abfrage-Tools nutzen, um Home, Räume/Bereiche, Geräte und Szenen zu prüfen.
-- Bei Verbindungsfehlern prüfen: MCP-Typ HTTP / Streamable HTTP, URL enthält `/open/mcp`, Anmeldedaten nicht abgelaufen, Anwendung nach Konfigurationsänderung neu gestartet oder MCP neu geladen.
+- Bei Verbindungsfehlern prüfen: MCP-Typ Streamable HTTP, URL enthält `/open/mcp`, Anmeldedaten nicht abgelaufen, Anwendung nach Konfigurationsänderung neu gestartet oder MCP neu geladen.
 
 ---
 

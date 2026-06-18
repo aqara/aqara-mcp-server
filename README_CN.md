@@ -19,7 +19,7 @@
 > [!TIP]
 > **推荐：Aqara 官方 Agent Skills**
 >
-> 如果您使用的应用支持 Agent Skills（如 Codex、Cursor、OpenClaw 等），优先推荐直接使用官方 **Aqara Agent Skills**。无需配置 MCP Server，即可通过自然语言完成家庭 / 空间、设备、场景、自动化、能耗等查询与控制。
+> 如果您使用的应用支持 Agent Skills（如 Codex App、Cursor、OpenClaw 等），优先推荐直接使用官方 **Aqara Agent Skills**。无需配置 MCP 服务器，即可通过自然语言完成家庭 / 空间、设备、场景、自动化、能耗等查询与控制。
 >
 > - GitHub：[aqara/aqara-agent-skills](https://github.com/aqara/aqara-agent-skills)
 > - ClawHub：[aqara/aqara-agent](https://clawhub.ai/aqara/aqara-agent)
@@ -51,8 +51,8 @@
 
 当前推荐的 MCP 接入方式围绕 Aqara Agent 展开：
 
-- **Remote MCP**：适合支持 Streamable HTTP / HTTP MCP 的应用通过 `https://agent.aqara.com/open/mcp` 接入。
-- **Aqara Agent Skills**：适合支持 Agent Skills 的应用直接安装技能，无需手动配置 MCP Server。
+- **Remote MCP**：适合支持 Streamable HTTP 的应用通过 `https://agent.aqara.com/open/mcp` 接入。
+- **Aqara Agent Skills**：适合支持 Agent Skills 的应用直接安装技能，无需手动配置 MCP 服务器。
 - **MCP Tool 能力**：覆盖家庭 / 空间、设备、场景、自动化、能耗、灯效和固件等智能家居操作。
 
 ## 特性
@@ -65,7 +65,7 @@
 - 💡 **灯效管理**：支持查询灯光情景 / 灯效、设置指定灯效，以及查询灯效配置参数。
 - 🔄 **固件管理**：支持查询设备当前固件版本、可升级版本，并发起设备固件升级。
 - 🏠 **多家庭与多空间支持**：支持查询 Aqara 账户下的家庭，以及当前家庭下的房间 / 空间。
-- 🔌 **远程 MCP 接入**：通过 HTTP MCP URL 接入，支持 Cursor、Codex 等应用。
+- 🔌 **远程 MCP 接入**：通过 MCP URL 接入，支持 Cursor、Codex App 等应用。
 - 🔐 **安全认证机制**：通过 Aqara Agent 登录获取 `aqara_api_key`，配置时请妥善保管凭据。
 
 ## 工作原理
@@ -74,12 +74,12 @@
 
 ```mermaid
 graph LR
-    A[AI 应用 / MCP Host] --> B[Aqara Agent]
+    A[AI 应用 / MCP host] --> B[Aqara Agent]
     B --> C[Aqara Cloud API]
     C --> D[Aqara 设备 / 场景 / 自动化]
 ```
 
-1. **AI 应用 / MCP Host**：用户通过 Cursor、Codex 等应用发出自然语言指令。
+1. **AI 应用 / MCP host**：用户通过 Cursor、Codex App 等应用发出自然语言指令。
 2. **Aqara Agent**：校验用户凭据，解析并执行对应 Tool。
 3. **Aqara Cloud API**：完成设备、场景、自动化、能耗、灯效、固件等数据查询或控制动作。
 
@@ -90,7 +90,7 @@ graph LR
 ### 先决条件
 
 - **Aqara 账户** 及已注册的智能设备。
-- **支持远程 MCP 的应用**，例如 Cursor、Codex 等。
+- **支持远程 MCP 的应用**，例如 Cursor、Codex App 等。
 - **Aqara Agent 凭据**：通过登录页获取 `aqara_api_key` 与 `aqara_mcp_url`。
 
 ### 第一步：账户认证
@@ -135,14 +135,20 @@ graph LR
 
 3. 保存配置并重启 Cursor，使 MCP 配置生效。
 
-#### Codex
+#### Codex App
 
-1. 在 Codex 设置中添加自定义 MCP Server。
-2. 类型选择 `流式 HTTP`。
-3. URL 填写登录页返回的 `aqara_mcp_url`，例如 `https://agent.aqara.com/open/mcp`。
-4. Bearer 令牌填写 `aqara_api_key` 的值。
+1. 先将登录页返回的 `aqara_api_key` 保存为环境变量。以 macOS 的 zsh 为例，在 `~/.zshrc` 中添加：
 
-![Codex 自定义 MCP 设置](img/codex_opening_setting.png)
+   ```bash
+   export AQARA_API_KEY="<YOUR_AQARA_API_KEY>"
+   ```
+
+2. 重启 Codex App，然后在设置中连接至自定义 MCP。
+3. 类型选择 `流式 HTTP`。
+4. URL 填写登录页返回的 `aqara_mcp_url`，例如 `https://agent.aqara.com/open/mcp`。
+5. `Bearer 令牌环境变量`填写环境变量名 `AQARA_API_KEY`，不要填写 API Key 的具体值。Codex App 会从该环境变量中读取令牌。
+
+![Codex App 自定义 MCP 设置](img/codex_opening_setting.png)
 
 ### 第三步：验证
 
@@ -167,7 +173,7 @@ graph LR
 
 - MCP URL 应使用 `https://agent.aqara.com/open/mcp` 或登录页返回的 `aqara_mcp_url`，不要把登录页地址当作 MCP URL。
 - 控制设备、执行场景、升级固件等 Tool 会影响真实家庭设备。首次使用时建议先用查询类 Tool 确认家庭、空间、设备和场景信息。
-- 如果连接失败，优先检查 MCP 类型是否为 HTTP / Streamable HTTP、URL 是否包含 `/open/mcp`、凭据是否过期，以及配置变更后应用是否已重启或重新加载 MCP。
+- 如果连接失败，优先检查 MCP 类型是否为 Streamable HTTP、URL 是否包含 `/open/mcp`、凭据是否过期，以及配置变更后应用是否已重启或重新加载 MCP。
 
 ---
 

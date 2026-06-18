@@ -19,7 +19,7 @@
 > [!TIP]
 > **권장: Aqara 공식 Agent Skills**
 >
-> 사용 중인 애플리케이션이 Agent Skills를 지원한다면(Codex, Cursor, OpenClaw 등), 공식 **Aqara Agent Skills**를 우선 사용하는 것을 권장합니다. MCP Server를 별도로 구성하지 않아도 자연어로 홈/공간, 기기, 씬, 자동화, 에너지 소비 등을 조회·제어할 수 있습니다.
+> 사용 중인 애플리케이션이 Agent Skills를 지원한다면(Codex App, Cursor, OpenClaw 등), 공식 **Aqara Agent Skills**를 우선 사용하는 것을 권장합니다. MCP 서버를 별도로 구성하지 않아도 자연어로 홈/공간, 기기, 씬, 자동화, 에너지 소비 등을 조회·제어할 수 있습니다.
 >
 > - GitHub: [aqara/aqara-agent-skills](https://github.com/aqara/aqara-agent-skills)
 > - ClawHub: [aqara/aqara-agent](https://clawhub.ai/aqara/aqara-agent)
@@ -51,8 +51,8 @@
 
 현재 권장되는 MCP 연동 방식은 Aqara Agent를 중심으로 합니다.
 
-- **Remote MCP**: Streamable HTTP / HTTP MCP를 지원하는 애플리케이션이 `https://agent.aqara.com/open/mcp`로 연결할 때 적합합니다.
-- **Aqara Agent Skills**: Agent Skills를 지원하는 애플리케이션은 스킬을 설치해 MCP Server를 수동으로 구성하지 않아도 됩니다.
+- **Remote MCP**: Streamable HTTP를 지원하는 애플리케이션이 `https://agent.aqara.com/open/mcp`로 연결할 때 적합합니다.
+- **Aqara Agent Skills**: Agent Skills를 지원하는 애플리케이션은 스킬을 설치해 MCP 서버를 수동으로 구성하지 않아도 됩니다.
 - **MCP Tool 기능**: 홈/공간, 기기, 씬, 자동화, 에너지 소비, 조명 시나리오 및 효과, 펌웨어 등 스마트홈 작업을 지원합니다.
 
 ## 기능
@@ -65,7 +65,7 @@
 - 💡 **조명 시나리오 및 효과 관리**: 조명 시나리오/효과 조회, 지정 효과 설정, 효과 구성 매개변수 조회를 지원합니다.
 - 🔄 **펌웨어 관리**: 기기의 현재 펌웨어 버전·업그레이드 가능 버전 조회 및 펌웨어 업그레이드 시작을 지원합니다.
 - 🏠 **다중 홈·다중 공간**: Aqara 계정의 홈 목록과 현재 홈의 방/공간을 조회할 수 있습니다.
-- 🔌 **원격 MCP 연동**: HTTP MCP URL로 Cursor, Codex 등 애플리케이션에 연결할 수 있습니다.
+- 🔌 **원격 MCP 연동**: MCP URL로 Cursor, Codex App 등 애플리케이션에 연결할 수 있습니다.
 - 🔐 **안전한 인증**: Aqara Agent 로그인으로 `aqara_api_key`를 발급받으며, 구성 시 자격 증명을 안전하게 보관하세요.
 
 ## 동작 방식
@@ -74,12 +74,12 @@
 
 ```mermaid
 graph LR
-    A[AI 앱 / MCP Host] --> B[Aqara Agent]
+    A[AI 앱 / MCP host] --> B[Aqara Agent]
     B --> C[Aqara Cloud API]
     C --> D[Aqara 기기 / 씬 / 자동화]
 ```
 
-1. **AI 앱 / MCP Host**: 사용자가 Cursor, Codex 등에서 자연어 명령을 입력합니다.
+1. **AI 앱 / MCP host**: 사용자가 Cursor, Codex App 등에서 자연어 명령을 입력합니다.
 2. **Aqara Agent**: 사용자 자격 증명을 검증하고 해당 Tool을 해석·실행합니다.
 3. **Aqara Cloud API**: 기기, 씬, 자동화, 에너지 소비, 조명 효과, 펌웨어 등의 데이터 조회 또는 제어를 수행합니다.
 
@@ -90,7 +90,7 @@ graph LR
 ### 사전 요구사항
 
 - **Aqara 계정** 및 등록된 스마트 기기.
-- **원격 MCP를 지원하는 애플리케이션**(예: Cursor, Codex).
+- **원격 MCP를 지원하는 애플리케이션**(예: Cursor, Codex App).
 - **Aqara Agent 자격 증명**: 로그인 페이지에서 `aqara_api_key`와 `aqara_mcp_url`을 발급받습니다.
 
 ### 1단계: 계정 인증
@@ -135,14 +135,20 @@ graph LR
 
 3. 구성을 저장하고 Cursor를 재시작해 MCP 구성을 적용합니다.
 
-#### Codex
+#### Codex App
 
-1. Codex 설정에서 사용자 지정 MCP Server를 추가합니다.
-2. 유형으로 `Streamable HTTP`를 선택합니다.
-3. URL에 로그인 페이지의 `aqara_mcp_url`(예: `https://agent.aqara.com/open/mcp`)을 입력합니다.
-4. Bearer 토큰에 `aqara_api_key` 값을 입력합니다.
+1. 로그인 페이지에 표시된 `aqara_api_key`를 환경 변수로 저장합니다. macOS의 zsh에서는 `~/.zshrc`에 다음을 추가합니다.
 
-![Codex 사용자 지정 MCP 설정](img/codex_opening_setting.png)
+   ```bash
+   export AQARA_API_KEY="<YOUR_AQARA_API_KEY>"
+   ```
+
+2. Codex App을 다시 시작한 다음 설정에서 맞춤형 MCP에 연결합니다.
+3. `스트리밍 가능한 HTTP`를 선택합니다.
+4. URL에 로그인 페이지의 `aqara_mcp_url`(예: `https://agent.aqara.com/open/mcp`)을 입력합니다.
+5. `기본 token 환경 변수`에는 API 키 값이 아닌 환경 변수 이름 `AQARA_API_KEY`를 입력합니다. Codex App은 이 환경 변수에서 토큰을 읽습니다.
+
+![Codex App 사용자 지정 MCP 설정](img/codex_opening_setting.png)
 
 ### 3단계: 확인
 
@@ -167,7 +173,7 @@ graph LR
 
 - MCP URL은 `https://agent.aqara.com/open/mcp` 또는 로그인 페이지의 `aqara_mcp_url`을 사용하세요. 로그인 페이지 주소를 MCP URL로 사용하지 마세요.
 - 기기 제어, 씬 실행, 펌웨어 업그레이드 등 Tool은 실제 홈 기기에 영향을 줍니다. 처음 사용할 때는 조회용 Tool로 홈, 공간, 기기, 씬 정보를 먼저 확인하는 것을 권장합니다.
-- 연결에 실패하면 MCP 유형이 HTTP / Streamable HTTP인지, URL에 `/open/mcp`가 포함되는지, 자격 증명 만료 여부, 구성 변경 후 애플리케이션 재시작 또는 MCP 다시 불러오기 여부를 확인하세요.
+- 연결에 실패하면 MCP 유형이 Streamable HTTP인지, URL에 `/open/mcp`가 포함되는지, 자격 증명 만료 여부, 구성 변경 후 애플리케이션 재시작 또는 MCP 다시 불러오기 여부를 확인하세요.
 
 ---
 
