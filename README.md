@@ -452,6 +452,31 @@ Start firmware upgrades for eligible devices after filtering by device, position
 - `time_gradient`: Energy statistics granularity: `30min`, `1hour`, `1day`, `1week`, `1month`.
 - `data_aggregation_mode`: Energy aggregation mode—`total` = aggregated summary, `detail` = detail view.
 
+## Windows Users
+
+When building the server for Windows, you must include the `.exe` extension in the output file:
+
+```go
+go build -ldflags="-s -w" -o aqara-mcp-server.exe
+```
+
+When configuring your MCP client (e.g., Claude Desktop), update the config file to point to the `.exe` binary:
+
+```json
+{
+  "mcpServers": {
+    "aqara": {
+      "command": "c:\\path\\to\\aqara-mcp-server.exe",
+      "args": ["run", "stdio"],
+      "env": {
+        "aqara_api_key": "your_api_key_here",
+        "aqara_base_url": "your_base_url_here"
+      }
+    }
+  }
+}
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE). See the [LICENSE](LICENSE) file for details.
